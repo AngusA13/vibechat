@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1241,7 +1240,7 @@ input:focus{
         <div class="logo">
             Vibe<span>Chat</span>
             <span class="version">
-                6.2
+                6.3
             </span>
         </div>
 
@@ -1650,10 +1649,10 @@ const CHAT_DELETE_TOPIC =
     "vibechat-7f4k2m9x-chat-delete";
 
 const DIRECTORY_HEARTBEAT =
-    15000;
+    30000;
 
 const PRESENCE_HEARTBEAT =
-    15000;
+    30000;
 
 
 /* =========================================
@@ -1687,6 +1686,7 @@ let eventSource = null;
 let presenceSource = null;
 let directorySource = null;
 let resetSource = null;
+let globalSource = null;
 
 let messageIds = new Set();
 let directorySeen = new Set();
@@ -2140,6 +2140,11 @@ function logout(){
     if(eventSource){
         eventSource.close();
         eventSource = null;
+    }
+
+    if(globalSource){
+        globalSource.close();
+        globalSource = null;
     }
 
     myUsername = "";
@@ -2811,7 +2816,7 @@ function connectToChat(){
         encodeURIComponent(
             currentChat.topic
         ) +
-        "/sse";
+        "/sse?stream=1";
 
 
     eventSource =
@@ -3775,6 +3780,114 @@ function connectResetListener(){
 
 
 /* =========================================
+   COMBINED GLOBAL STREAM
+   ========================================= */
+
+function connectGlobalStreams(){
+
+    if(globalSource){
+        globalSource.close();
+    }
+
+    const topics = [
+        PRESENCE_TOPIC,
+        CHAT_DIRECTORY_TOPIC,
+        CHAT_DELETE_TOPIC,
+        RESET_TOPIC
+    ].map(encodeURIComponent).join(",");
+
+    globalSource = new EventSource(
+        "https://ntfy.sh/" + topics + "/sse"
+    );
+
+    globalSource.onmessage = function(event){
+        try{
+            const data = JSON.parse(event.data);
+            if(data.event !== "message") return;
+
+            const topic = data.topic || "";
+
+            if(topic === PRESENCE_TOPIC){
+                const user = JSON.parse(data.message);
+                if(user.type === "user" && user.name && !users.includes(user.name)){
+                    users.push(user.name);
+                    renderUserList();
+                }
+                return;
+            }
+
+            if(topic === CHAT_DELETE_TOPIC){
+                const deletion = JSON.parse(data.message);
+                if(deletion.type === "chat-delete" && deletion.chatId && deletion.by !== myUsername){
+                    removeLocalChat(deletion.chatId);
+                    showToast("🗑 A chat was deleted by the owner");
+                }
+                return;
+            }
+
+            if(topic === RESET_TOPIC){
+                const reset = JSON.parse(data.message);
+                if(reset.type === "global-reset" && reset.by !== myUsername){
+                    performLocalReset(false);
+                    showToast("⚠️ VibeChat was reset by the owner");
+                }
+                return;
+            }
+
+            if(topic === CHAT_DIRECTORY_TOPIC){
+                const chat = JSON.parse(data.message);
+                if(chat.type !== "chat" || !chat.id || !chat.topic || !chat.name) return;
+
+                const everyone = chat.everyone === true;
+                const chatUsers = Array.isArray(chat.users) ? chat.users : [];
+                const allowed = everyone || chatUsers.includes(myUsername);
+                if(!allowed) return;
+
+                const announcementId = chat.announcementId || (chat.id + "-" + chat.announcedAt);
+                if(directorySeen.has(announcementId)) return;
+                directorySeen.add(announcementId);
+
+                const existing = chats.find(item => item.id === chat.id);
+                if(existing){
+                    existing.name = chat.name;
+                    existing.topic = chat.topic;
+                    existing.shared = true;
+                    existing.everyone = everyone;
+                    existing.users = chatUsers;
+                    saveChats();
+                    renderChats();
+                    return;
+                }
+
+                chats.push({
+                    id: chat.id,
+                    name: chat.name,
+                    topic: chat.topic,
+                    shared: true,
+                    everyone: everyone,
+                    users: chatUsers,
+                    createdBy: chat.createdBy || "VibeChat user",
+                    createdAt: chat.createdAt || Date.now()
+                });
+
+                saveChats();
+                renderChats();
+                showToast(everyone ? "🌎 New chat: " + chat.name : "💬 New chat for you: " + chat.name);
+            }
+        }
+        catch(error){
+            console.log("Global stream error:", error);
+        }
+    };
+
+    globalSource.onerror = function(){
+        // EventSource automatically reconnects.
+        // Keep this stream separate from the active chat stream.
+    };
+}
+
+
+/* =========================================
    OWNER RESET
    ========================================= */
 
@@ -4328,13 +4441,7 @@ function startVibeChat(){
 
     announcePresence();
 
-    connectPresence();
-
-    connectDirectory();
-
-    connectChatDeleteListener();
-
-    connectResetListener();
+    connectGlobalStreams();
 
     startPresenceHeartbeat();
 
