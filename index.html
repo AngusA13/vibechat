@@ -1,177 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeChat</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VibeChat</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<style>
+* {
+    box-sizing: border-box;
+}
 
-        body {
-            margin: 0;
-            height: 100vh;
-            background: #090b12;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
+body {
+    margin: 0;
+    height: 100vh;
+    background: #090b12;
+    color: white;
+    font-family: Arial, sans-serif;
+}
 
-        .app {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: #10131d;
-        }
+.app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #10131d;
+}
 
-        .topbar {
-            padding: 18px 22px;
-            background: #131722;
-            border-bottom: 1px solid #292e3d;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.topbar {
+    padding: 18px 22px;
+    background: #131722;
+    border-bottom: 1px solid #292e3d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .title {
-            font-size: 26px;
-            font-weight: bold;
-        }
+.title {
+    font-size: 26px;
+    font-weight: bold;
+}
 
-        .status {
-            margin-top: 5px;
-            color: #9da6ba;
-            font-size: 13px;
-        }
+.status {
+    margin-top: 5px;
+    color: #9da6ba;
+    font-size: 13px;
+}
 
-        .online-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #35e77a;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #35e77a;
+    margin-right: 6px;
+}
 
-        .clear-button {
-            background: transparent;
-            color: #aeb6c9;
-            border: 1px solid #343b4d;
-            padding: 9px 13px;
-            border-radius: 9px;
-            cursor: pointer;
-        }
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
-        .clear-button:hover {
-            background: #1c2130;
-        }
+.message {
+    max-width: 75%;
+    padding: 12px 15px;
+    border-radius: 15px;
+    background: #1b2030;
+    align-self: flex-start;
+    word-wrap: break-word;
+}
 
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+.message.mine {
+    align-self: flex-end;
+    background: #315cff;
+}
 
-        .empty {
-            margin: auto;
-            text-align: center;
-            color: #7f899e;
-            font-size: 16px;
-        }
+.username {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
 
-        .message {
-            max-width: 75%;
-            background: #1b2030;
-            padding: 12px 15px;
-            border-radius: 15px;
-            align-self: flex-start;
-        }
+.time {
+    opacity: .6;
+    font-weight: normal;
+    margin-left: 7px;
+}
 
-        .message.mine {
-            align-self: flex-end;
-            background: #315cff;
-        }
+.text {
+    font-size: 15px;
+    line-height: 1.4;
+}
 
-        .username {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+.empty {
+    margin: auto;
+    text-align: center;
+    color: #7f899e;
+}
 
-        .time {
-            opacity: 0.6;
-            font-weight: normal;
-            margin-left: 6px;
-        }
+.composer {
+    padding: 15px;
+    background: #131722;
+    border-top: 1px solid #292e3d;
+    display: flex;
+    gap: 9px;
+}
 
-        .message-text {
-            font-size: 15px;
-            line-height: 1.4;
-            overflow-wrap: anywhere;
-        }
+input {
+    background: #0c0f17;
+    color: white;
+    border: 1px solid #30374a;
+    border-radius: 10px;
+    padding: 12px;
+    outline: none;
+}
 
-        .composer {
-            padding: 15px;
-            background: #131722;
-            border-top: 1px solid #292e3d;
-            display: flex;
-            gap: 9px;
-        }
+input:focus {
+    border-color: #5578ff;
+}
 
-        input {
-            background: #0c0f17;
-            color: white;
-            border: 1px solid #30374a;
-            border-radius: 10px;
-            padding: 12px;
-            outline: none;
-        }
+#username {
+    width: 150px;
+}
 
-        input:focus {
-            border-color: #5578ff;
-        }
+#message {
+    flex: 1;
+}
 
-        #username {
-            width: 150px;
-        }
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    background: #315cff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-        #message {
-            flex: 1;
-        }
+button:hover {
+    background: #466dff;
+}
 
-        .send-button {
-            border: none;
-            border-radius: 10px;
-            padding: 0 20px;
-            background: #315cff;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+.sent {
+    font-size: 11px;
+    margin-left: 7px;
+    opacity: .8;
+}
 
-        .send-button:hover {
-            background: #466dff;
-        }
+@media(max-width:600px) {
+    #username {
+        width: 100px;
+    }
 
-        @media (max-width: 600px) {
-            #username {
-                width: 100px;
-            }
+    .message {
+        max-width: 88%;
+    }
 
-            .message {
-                max-width: 88%;
-            }
-
-            .messages {
-                padding: 15px;
-            }
-        }
-    </style>
+    .messages {
+        padding: 15px;
+    }
+}
+</style>
 </head>
 
 <body>
@@ -184,29 +175,24 @@
             <div class="title">💬 VibeChat</div>
 
             <div class="status">
-                <span class="online-dot"></span>
-                Online
+                <span class="dot"></span>
+                <span id="connectionStatus">Connecting...</span>
             </div>
         </div>
-
-        <button class="clear-button" onclick="clearChat()">
-            Clear Chat
-        </button>
 
     </header>
 
 
     <main id="messages" class="messages">
 
-        <div id="emptyMessage" class="empty">
-            No messages yet.<br>
-            Start the vibe 💬
+        <div class="empty" id="empty">
+            Connecting to VibeChat...
         </div>
 
     </main>
 
 
-    <form class="composer" onsubmit="sendMessage(event)">
+    <form class="composer" id="chatForm">
 
         <input
             id="username"
@@ -222,7 +208,7 @@
             autocomplete="off"
         >
 
-        <button class="send-button" type="submit">
+        <button type="submit">
             Send
         </button>
 
@@ -233,121 +219,183 @@
 
 <script>
 
-    let messages = JSON.parse(
-        localStorage.getItem("vibechat_messages") || "[]"
-    );
+const topic = "vibechat-7f4k2m9x";
 
-    const usernameInput =
-        document.getElementById("username");
+const usernameInput =
+    document.getElementById("username");
 
-    const messageInput =
-        document.getElementById("message");
+const messageInput =
+    document.getElementById("message");
 
-    const messagesContainer =
-        document.getElementById("messages");
+const messages =
+    document.getElementById("messages");
 
-    const emptyMessage =
-        document.getElementById("emptyMessage");
+const empty =
+    document.getElementById("empty");
+
+const status =
+    document.getElementById("connectionStatus");
+
+const form =
+    document.getElementById("chatForm");
 
 
-    usernameInput.value =
-        localStorage.getItem("vibechat_username") || "";
+let myUsername =
+    localStorage.getItem("vibechat_username") || "";
 
 
-    function escapeHTML(text) {
+usernameInput.value = myUsername;
 
-        const element =
-            document.createElement("div");
 
-        element.textContent = text;
+function escapeHTML(text) {
 
-        return element.innerHTML;
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+
+function addMessage(username, text, time, mine = false) {
+
+    if (empty) {
+        empty.remove();
     }
 
+    const bubble =
+        document.createElement("div");
 
-    function saveMessages() {
-
-        localStorage.setItem(
-            "vibechat_messages",
-            JSON.stringify(messages)
-        );
-    }
+    bubble.className =
+        "message" + (mine ? " mine" : "");
 
 
-    function displayMessages() {
+    const safeUsername =
+        escapeHTML(username);
 
-        messagesContainer.innerHTML = "";
-
-        if (messages.length === 0) {
-
-            messagesContainer.innerHTML = `
-                <div class="empty">
-                    No messages yet.<br>
-                    Start the vibe 💬
-                </div>
-            `;
-
-            return;
-        }
+    const safeText =
+        escapeHTML(text);
 
 
-        messages.forEach(message => {
+    bubble.innerHTML = `
+        <div class="username">
+            ${safeUsername}
+            <span class="time">${time}</span>
+            ${mine ? '<span class="sent">✓ Sent</span>' : ''}
+        </div>
 
-            const bubble =
-                document.createElement("div");
+        <div class="text">
+            ${safeText}
+        </div>
+    `;
 
 
-            const currentUsername =
-                usernameInput.value.trim();
+    messages.appendChild(bubble);
+
+    messages.scrollTop =
+        messages.scrollHeight;
+}
 
 
-            bubble.className =
-                "message" +
-                (
-                    message.username === currentUsername
-                        ? " mine"
-                        : ""
-                );
+function connect() {
+
+    const url =
+        "https://ntfy.sh/" +
+        topic +
+        "/sse";
+
+
+    const stream =
+        new EventSource(url);
+
+
+    stream.onopen = () => {
+
+        status.textContent =
+            "Connected";
+
+    };
+
+
+    stream.onmessage = event => {
+
+        try {
+
+            const data =
+                JSON.parse(event.data);
+
+
+            if (data.event !== "message") {
+                return;
+            }
+
+
+            const parts =
+                data.message.split("|");
+
+
+            if (parts.length < 2) {
+                return;
+            }
+
+
+            const username =
+                parts.shift();
+
+            const text =
+                parts.join("|");
+
+
+            const date =
+                new Date(data.time * 1000);
 
 
             const time =
-                new Date(message.time)
-                .toLocaleTimeString([], {
+                date.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit"
                 });
 
 
-            bubble.innerHTML = `
-
-                <div class="username">
-
-                    ${escapeHTML(message.username)}
-
-                    <span class="time">
-                        ${time}
-                    </span>
-
-                </div>
-
-                <div class="message-text">
-                    ${escapeHTML(message.text)}
-                </div>
-
-            `;
+            const mine =
+                username ===
+                usernameInput.value.trim();
 
 
-            messagesContainer.appendChild(bubble);
+            addMessage(
+                username,
+                text,
+                time,
+                mine
+            );
 
-        });
+        }
+
+        catch(error) {
+
+            console.log(
+                "Message error:",
+                error
+            );
+
+        }
+
+    };
 
 
-        messagesContainer.scrollTop =
-            messagesContainer.scrollHeight;
-    }
+    stream.onerror = () => {
+
+        status.textContent =
+            "Reconnecting...";
+
+    };
+
+}
 
 
-    function sendMessage(event) {
+form.addEventListener(
+    "submit",
+    async event => {
 
         event.preventDefault();
 
@@ -372,50 +420,51 @@
         );
 
 
-        messages.push({
+        try {
 
-            username: username,
-
-            text: text,
-
-            time: new Date().toISOString()
-
-        });
-
-
-        saveMessages();
-
-
-        messageInput.value = "";
+            const response =
+                await fetch(
+                    "https://ntfy.sh/" + topic,
+                    {
+                        method: "POST",
+                        body:
+                            username +
+                            "|" +
+                            text
+                    }
+                );
 
 
-        displayMessages();
+            if (!response.ok) {
+
+                throw new Error(
+                    "Send failed"
+                );
+
+            }
 
 
-        messageInput.focus();
+            messageInput.value = "";
 
-    }
+            messageInput.focus();
 
-
-    function clearChat() {
-
-        if (!confirm("Clear the chat on this browser?")) {
-            return;
         }
 
+        catch(error) {
 
-        messages = [];
+            alert(
+                "Couldn't send the message. Try again."
+            );
 
+            console.error(error);
 
-        saveMessages();
-
-
-        displayMessages();
+        }
 
     }
+);
 
 
-    displayMessages();
+connect();
 
 </script>
 
