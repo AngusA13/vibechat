@@ -1,1121 +1,1176 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeChat 5.0</title>
+<title>VibeChat 6.0</title>
 
 <style>
+*{box-sizing:border-box}
 
-* {
-    box-sizing: border-box;
+:root{
+    --bg:#050711;
+    --panel:rgba(13,17,30,.94);
+    --panel2:rgba(20,25,43,.96);
+    --border:rgba(130,145,200,.16);
+    --blue:#4d6fff;
+    --purple:#7657ff;
+    --text:#f5f7ff;
+    --muted:#7f8aa5;
+    --green:#35e77a;
+    --red:#ff4f68;
+    --gold:#ffc84d;
 }
 
-:root {
-    --bg: #060812;
-    --panel: rgba(14,18,31,.88);
-    --panel2: rgba(20,25,42,.92);
-    --border: rgba(120,140,190,.16);
-    --blue: #4d6fff;
-    --blue2: #6d5cff;
-    --text: #f5f7ff;
-    --muted: #858fa8;
-    --green: #35e77a;
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
 }
 
-html,
-body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-}
-
-body {
-    height: 100vh;
+body{
+    height:100vh;
     background:
-        radial-gradient(
-            circle at 15% 10%,
-            rgba(69,92,255,.14),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 85% 85%,
-            rgba(130,75,255,.13),
-            transparent 30%
-        ),
-        #060812;
-    color: var(--text);
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-    overflow: hidden;
+        radial-gradient(circle at 10% 10%,rgba(64,88,255,.16),transparent 30%),
+        radial-gradient(circle at 90% 90%,rgba(125,65,255,.14),transparent 32%),
+        #050711;
+    color:var(--text);
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    overflow:hidden;
 }
 
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.35;
+    background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+    background-size:40px 40px;
+}
+
+button,input{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+
+/* LOGIN */
+
+.login-screen{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
     background:
-        linear-gradient(
-            120deg,
-            transparent 0%,
-            rgba(90,110,255,.025) 50%,
-            transparent 100%
-        );
-    animation: backgroundMove 10s ease-in-out infinite;
+        radial-gradient(circle at 50% 30%,rgba(75,96,255,.18),transparent 35%),
+        rgba(3,5,12,.96);
+    backdrop-filter:blur(15px);
 }
 
-@keyframes backgroundMove {
-    0%,100% {
-        opacity: .5;
-        transform: translateX(-2%);
+.login-card{
+    width:min(430px,100%);
+    padding:34px;
+    border-radius:25px;
+    background:
+        linear-gradient(145deg,rgba(24,29,49,.98),rgba(10,14,25,.98));
+    border:1px solid rgba(120,140,210,.2);
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.65),
+        0 0 50px rgba(68,87,255,.1);
+    animation:loginIn .35s ease;
+}
+
+@keyframes loginIn{
+    from{
+        opacity:0;
+        transform:translateY(15px) scale(.97);
     }
-
-    50% {
-        opacity: 1;
-        transform: translateX(2%);
-    }
-}
-
-button,
-input {
-    font-family: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-button:active {
-    transform: scale(.97);
-}
-
-
-/* =========================================
-   APP
-   ========================================= */
-
-.app {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    background:
-        rgba(7,9,18,.72);
-}
-
-
-/* =========================================
-   SIDEBAR
-   ========================================= */
-
-.sidebar {
-    width: 275px;
-    background:
-        linear-gradient(
-            180deg,
-            rgba(15,19,33,.97),
-            rgba(9,12,22,.97)
-        );
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 5;
-    box-shadow:
-        10px 0 40px rgba(0,0,0,.18);
-}
-
-
-/* =========================================
-   LOGO
-   ========================================= */
-
-.logo {
-    padding: 23px 20px;
-    font-size: 25px;
-    font-weight: 900;
-    letter-spacing: -.7px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.logo::before {
-    content: "💬";
-    font-size: 22px;
-    filter: drop-shadow(
-        0 0 10px rgba(77,111,255,.6)
-    );
-}
-
-.logo span {
-    color: #6b82ff;
-}
-
-.version {
-    font-size: 9px;
-    color: #68728b !important;
-    margin-left: auto;
-    background: rgba(255,255,255,.05);
-    border: 1px solid var(--border);
-    padding: 4px 7px;
-    border-radius: 6px;
-    letter-spacing: .5px;
-}
-
-
-/* =========================================
-   SIDEBAR TITLE
-   ========================================= */
-
-.rooms-title {
-    padding: 20px 17px 9px;
-    color: #737e98;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-}
-
-
-/* =========================================
-   ROOMS
-   ========================================= */
-
-.rooms {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 8px;
-}
-
-.rooms::-webkit-scrollbar {
-    width: 5px;
-}
-
-.rooms::-webkit-scrollbar-thumb {
-    background: #252c42;
-    border-radius: 10px;
-}
-
-.room {
-    margin: 4px 10px;
-    padding: 13px 13px;
-    min-height: 48px;
-    border-radius: 11px;
-    color: #aab3c8;
-    cursor: pointer;
-    transition:
-        background .18s,
-        transform .18s,
-        color .18s,
-        box-shadow .18s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid transparent;
-}
-
-.room:hover {
-    background:
-        rgba(53,63,95,.28);
-    color: white;
-    transform: translateX(2px);
-}
-
-.room.active {
-    background:
-        linear-gradient(
-            135deg,
-            rgba(67,91,255,.95),
-            rgba(82,69,220,.95)
-        );
-    color: white;
-    border-color:
-        rgba(130,145,255,.3);
-    box-shadow:
-        0 7px 22px rgba(54,78,255,.2);
-}
-
-.room-icon {
-    width: 27px;
-    height: 27px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: rgba(255,255,255,.07);
-    flex-shrink: 0;
-}
-
-.room.active .room-icon {
-    background: rgba(255,255,255,.14);
-}
-
-.room > span:last-child {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-
-/* =========================================
-   NO CHATS
-   ========================================= */
-
-.no-chats {
-    margin: 15px 12px;
-    padding: 22px 14px;
-    color: #65708a;
-    font-size: 12px;
-    text-align: center;
-    line-height: 1.6;
-    border: 1px dashed rgba(120,140,190,.14);
-    border-radius: 12px;
-    background: rgba(255,255,255,.015);
-}
-
-
-/* =========================================
-   CREATE CHAT
-   ========================================= */
-
-.create-chat {
-    margin: 11px;
-    padding: 13px;
-    border: 1px solid rgba(100,120,255,.3);
-    border-radius: 11px;
-    background:
-        linear-gradient(
-            135deg,
-            rgba(49,92,255,.18),
-            rgba(100,70,255,.12)
-        );
-    color: white;
-    font-weight: 800;
-    transition: .2s;
-    box-shadow:
-        0 5px 20px rgba(44,65,220,.1);
-}
-
-.create-chat:hover {
-    background:
-        linear-gradient(
-            135deg,
-            rgba(60,105,255,.3),
-            rgba(110,75,255,.22)
-        );
-    border-color:
-        rgba(120,140,255,.5);
-    transform: translateY(-1px);
-    box-shadow:
-        0 8px 25px rgba(44,65,220,.2);
-}
-
-
-/* =========================================
-   MAIN CHAT
-   ========================================= */
-
-.chat {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(58,77,170,.08),
-            transparent 45%
-        );
-}
-
-
-/* =========================================
-   TOP BAR
-   ========================================= */
-
-.topbar {
-    min-height: 78px;
-    padding: 13px 22px;
-    background:
-        rgba(15,19,32,.82);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    z-index: 3;
-}
-
-.room-name {
-    font-size: 20px;
-    font-weight: 850;
-    letter-spacing: -.3px;
-}
-
-.room-status {
-    margin-top: 6px;
-    color: #7e89a1;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-}
-
-.online-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    margin-right: 7px;
-    box-shadow:
-        0 0 0 3px rgba(53,231,122,.08),
-        0 0 12px rgba(53,231,122,.45);
-    animation: onlinePulse 2s infinite;
-}
-
-@keyframes onlinePulse {
-    0%,100% {
-        box-shadow:
-            0 0 0 3px rgba(53,231,122,.08),
-            0 0 10px rgba(53,231,122,.3);
-    }
-
-    50% {
-        box-shadow:
-            0 0 0 5px rgba(53,231,122,.04),
-            0 0 18px rgba(53,231,122,.55);
+    to{
+        opacity:1;
+        transform:none;
     }
 }
 
-
-/* =========================================
-   PROFILE
-   ========================================= */
-
-.profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 6px 5px 5px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.025);
-    border: 1px solid rgba(255,255,255,.045);
+.login-logo{
+    text-align:center;
+    font-size:38px;
+    font-weight:950;
+    letter-spacing:-2px;
+    margin-bottom:8px;
 }
 
-.avatar {
-    width: 39px;
-    height: 39px;
-    border-radius: 12px;
+.login-logo span{
+    color:#6b80ff;
+}
+
+.login-subtitle{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:28px;
+}
+
+.auth-tabs{
+    display:flex;
+    gap:6px;
+    padding:5px;
+    background:rgba(0,0,0,.25);
+    border:1px solid var(--border);
+    border-radius:13px;
+    margin-bottom:20px;
+}
+
+.auth-tab{
+    flex:1;
+    border:0;
+    padding:11px;
+    border-radius:9px;
+    color:#8994ad;
+    background:transparent;
+    font-weight:800;
+}
+
+.auth-tab.active{
+    color:white;
+    background:linear-gradient(135deg,#315cff,#6651ee);
+}
+
+.auth-label{
+    display:block;
+    color:#a8b1c7;
+    font-size:11px;
+    font-weight:800;
+    margin:14px 0 7px;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+}
+
+.auth-input{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid rgba(100,115,160,.2);
+    background:rgba(5,8,16,.75);
+    color:white;
+    outline:none;
+}
+
+.auth-input:focus{
+    border-color:#607aff;
+    box-shadow:0 0 0 3px rgba(80,105,255,.1);
+}
+
+.auth-button{
+    width:100%;
+    margin-top:20px;
+    border:0;
+    border-radius:12px;
+    padding:14px;
+    color:white;
+    font-weight:900;
+    background:linear-gradient(135deg,#315cff,#704fff);
+    box-shadow:0 8px 25px rgba(60,75,240,.25);
+}
+
+.auth-error{
+    min-height:18px;
+    margin-top:12px;
+    color:#ff6377;
+    font-size:12px;
+    text-align:center;
+}
+
+
+/* APP */
+
+.app{
+    width:100%;
+    height:100vh;
+    display:flex;
+}
+
+
+/* SIDEBAR */
+
+.sidebar{
+    width:285px;
     background:
-        linear-gradient(
-            135deg,
-            #4264ff,
-            #704eff
-        );
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 900;
-    user-select: none;
-    box-shadow:
-        0 4px 16px rgba(69,82,255,.3);
+        linear-gradient(180deg,rgba(15,19,34,.98),rgba(7,10,19,.98));
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    z-index:5;
+    box-shadow:12px 0 45px rgba(0,0,0,.2);
 }
 
-.profile-name {
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 13px;
-    font-weight: 700;
+.logo{
+    padding:23px 20px;
+    font-size:25px;
+    font-weight:950;
+    letter-spacing:-1px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:7px;
 }
 
-
-/* =========================================
-   MESSAGES
-   ========================================= */
-
-.messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 28px 26px;
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-    scroll-behavior: smooth;
+.logo::before{
+    content:"💬";
+    font-size:22px;
 }
 
-.messages::-webkit-scrollbar {
-    width: 7px;
+.logo span{
+    color:#6b82ff;
 }
 
-.messages::-webkit-scrollbar-thumb {
-    background: #242b40;
-    border-radius: 20px;
+.version{
+    font-size:9px;
+    color:#69738b!important;
+    margin-left:auto;
+    padding:4px 7px;
+    border-radius:6px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    letter-spacing:.5px;
 }
 
-.empty {
-    margin: auto;
-    text-align: center;
-    color: #69748d;
-    line-height: 1.7;
-    padding: 30px;
+.rooms-title{
+    padding:18px 16px 8px;
+    color:#6f7a95;
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1.3px;
 }
 
-.empty::first-line {
-    color: #9ba6be;
+.rooms{
+    flex:1;
+    overflow-y:auto;
 }
 
-
-/* =========================================
-   MESSAGE
-   ========================================= */
-
-.message {
-    max-width: min(75%, 650px);
-    padding: 12px 15px;
-    border-radius: 17px;
-    background:
-        linear-gradient(
-            145deg,
-            rgba(30,36,54,.95),
-            rgba(23,28,44,.95)
-        );
-    align-self: flex-start;
-    position: relative;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-    border: 1px solid rgba(130,145,190,.08);
-    box-shadow:
-        0 4px 15px rgba(0,0,0,.12);
-    animation: messageIn .22s ease-out;
-    transition: transform .15s;
+.rooms::-webkit-scrollbar{
+    width:5px;
 }
 
-.message:hover {
-    transform: translateY(-1px);
+.rooms::-webkit-scrollbar-thumb{
+    background:#252d44;
+    border-radius:20px;
 }
 
-@keyframes messageIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.room{
+    margin:5px 10px;
+    padding:12px;
+    min-height:54px;
+    border-radius:13px;
+    color:#aab3c8;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    border:1px solid transparent;
+    transition:.18s;
 }
 
-.message.mine {
-    align-self: flex-end;
-    background:
-        linear-gradient(
-            135deg,
-            #315cff,
-            #574de8
-        );
-    border-color:
-        rgba(145,155,255,.22);
-    box-shadow:
-        0 5px 22px rgba(52,74,235,.18);
+.room:hover{
+    background:rgba(55,65,100,.25);
+    color:white;
+    transform:translateX(2px);
 }
 
-.message-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
+.room.active{
+    color:white;
+    background:linear-gradient(135deg,#3c5eff,#584be4);
+    border-color:rgba(145,155,255,.28);
+    box-shadow:0 8px 25px rgba(50,70,230,.22);
 }
 
-.message-avatar {
-    width: 26px;
-    height: 26px;
-    border-radius: 9px;
-    background:
-        linear-gradient(
-            135deg,
-            #536ff5,
-            #7059e8
-        );
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 10px;
-    font-weight: 900;
-    margin-right: 8px;
+.room-icon{
+    width:34px;
+    height:34px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:rgba(255,255,255,.07);
 }
 
-.message.mine .message-avatar {
-    background: rgba(255,255,255,.18);
+.room.active .room-icon{
+    background:rgba(255,255,255,.14);
 }
 
-.username {
-    font-size: 12px;
-    font-weight: 800;
+.room-name-small{
+    flex:1;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    font-weight:700;
+    font-size:13px;
 }
 
-.time {
-    opacity: .5;
-    font-size: 10px;
-    font-weight: normal;
-    margin-left: 8px;
+.shared-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 10px rgba(53,231,122,.6);
 }
 
-.message-text {
-    font-size: 14px;
-    line-height: 1.55;
+.no-chats{
+    margin:15px 12px;
+    padding:22px 14px;
+    color:#65708a;
+    font-size:12px;
+    text-align:center;
+    line-height:1.6;
+    border:1px dashed rgba(120,140,190,.14);
+    border-radius:13px;
 }
 
-.sent {
-    font-size: 9px;
-    margin-left: 7px;
-    opacity: .7;
+.create-chat{
+    margin:11px;
+    padding:14px;
+    border:1px solid rgba(100,120,255,.3);
+    border-radius:12px;
+    background:linear-gradient(135deg,rgba(49,92,255,.2),rgba(100,70,255,.13));
+    color:white;
+    font-weight:900;
+    transition:.2s;
+}
+
+.create-chat:hover{
+    transform:translateY(-2px);
+    border-color:rgba(120,140,255,.55);
+    box-shadow:0 10px 28px rgba(45,65,220,.2);
 }
 
 
-/* =========================================
-   COMPOSER
-   ========================================= */
+/* USER CARD */
 
-.composer {
-    padding: 15px 17px;
-    background:
-        rgba(13,17,29,.88);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    position: relative;
-    z-index: 4;
+.user-card{
+    margin:10px;
+    padding:11px;
+    border-radius:14px;
+    background:rgba(255,255,255,.025);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-input {
-    background:
-        rgba(7,10,19,.8);
-    color: white;
-    border: 1px solid rgba(100,115,150,.2);
-    border-radius: 12px;
-    padding: 13px;
-    outline: none;
-    transition: .2s;
+.user-card-avatar{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    background:linear-gradient(135deg,#4264ff,#7355ef);
 }
 
-input::placeholder {
-    color: #59647c;
+.user-card-info{
+    min-width:0;
+    flex:1;
 }
 
-input:focus {
-    border-color: rgba(86,115,255,.65);
-    box-shadow:
-        0 0 0 3px rgba(75,100,255,.08);
-    background: rgba(9,12,23,.95);
+.user-card-name{
+    font-size:12px;
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
-#message {
-    flex: 1;
+.user-card-status{
+    color:#65708a;
+    font-size:10px;
+    margin-top:3px;
 }
 
-.send-button {
-    border: none;
-    border-radius: 12px;
-    padding: 0 21px;
-    background:
-        linear-gradient(
-            135deg,
-            #315cff,
-            #6350ee
-        );
-    color: white;
-    font-weight: 800;
-    box-shadow:
-        0 5px 18px rgba(57,76,235,.22);
-    transition: .2s;
-}
-
-.send-button:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-    box-shadow:
-        0 8px 24px rgba(57,76,235,.3);
-}
-
-.emoji-button {
-    width: 48px;
-    border: 1px solid rgba(100,115,160,.18);
-    border-radius: 12px;
-    background:
-        rgba(30,37,56,.8);
-    color: white;
-    font-size: 20px;
-    transition: .2s;
-}
-
-.emoji-button:hover {
-    background: rgba(48,57,82,.9);
-    transform: translateY(-1px);
+.owner-badge{
+    color:var(--gold);
+    font-size:15px;
 }
 
 
-/* =========================================
-   EMOJI PANEL
-   ========================================= */
+/* CHAT */
 
-.emoji-panel {
-    position: absolute;
-    bottom: 82px;
-    right: 78px;
-    width: 275px;
-    padding: 13px;
-    background:
-        rgba(19,24,39,.97);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(120,140,190,.18);
-    border-radius: 16px;
-    display: none;
-    grid-template-columns: repeat(7,1fr);
-    gap: 5px;
-    box-shadow:
-        0 18px 55px rgba(0,0,0,.5);
-    animation: emojiIn .16s ease-out;
+.chat{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    position:relative;
 }
 
-.emoji-panel.show {
-    display: grid;
+.topbar{
+    min-height:82px;
+    padding:13px 22px;
+    background:rgba(14,18,31,.82);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    z-index:3;
 }
 
-@keyframes emojiIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px) scale(.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.chat-heading{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
-.emoji {
-    border: none;
-    background: transparent;
-    color: white;
-    font-size: 21px;
-    padding: 7px;
-    border-radius: 8px;
-    transition: .12s;
+.chat-heading-icon{
+    width:43px;
+    height:43px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+    background:linear-gradient(135deg,rgba(63,91,255,.3),rgba(113,76,255,.25));
+    border:1px solid rgba(110,125,255,.2);
 }
 
-.emoji:hover {
-    background: rgba(75,92,145,.3);
-    transform: scale(1.12);
+.room-name{
+    font-size:20px;
+    font-weight:900;
+    letter-spacing:-.4px;
 }
 
-
-/* =========================================
-   TOAST
-   ========================================= */
-
-.toast {
-    position: fixed;
-    bottom: 88px;
-    left: 50%;
-    transform:
-        translateX(-50%)
-        translateY(18px);
-    background:
-        rgba(25,31,48,.96);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(120,140,190,.2);
-    padding: 12px 18px;
-    border-radius: 12px;
-    opacity: 0;
-    pointer-events: none;
-    transition: .25s;
-    z-index: 100;
-    box-shadow:
-        0 12px 35px rgba(0,0,0,.4);
-    font-size: 13px;
-    font-weight: 650;
+.room-status{
+    margin-top:5px;
+    color:#7e89a1;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    gap:7px;
 }
 
-.toast.show {
-    opacity: 1;
-    transform:
-        translateX(-50%)
-        translateY(0);
+.online-dot{
+    width:7px;
+    height:7px;
+    background:var(--green);
+    border-radius:50%;
+    box-shadow:0 0 12px rgba(53,231,122,.6);
+    animation:onlinePulse 2s infinite;
 }
 
-
-/* =========================================
-   MODAL
-   ========================================= */
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background:
-        rgba(2,4,10,.72);
-    backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 20px;
-}
-
-.modal-overlay.show {
-    display: flex;
-    animation: modalBackground .2s ease-out;
-}
-
-@keyframes modalBackground {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
+@keyframes onlinePulse{
+    50%{
+        box-shadow:0 0 18px rgba(53,231,122,.9);
+        transform:scale(1.15);
     }
 }
 
-.modal {
-    width: min(440px,100%);
-    background:
-        linear-gradient(
-            145deg,
-            rgba(24,29,47,.98),
-            rgba(14,18,31,.98)
-        );
-    border: 1px solid rgba(120,140,190,.2);
-    border-radius: 19px;
-    padding: 25px;
-    box-shadow:
-        0 25px 80px rgba(0,0,0,.65),
-        0 0 40px rgba(62,80,200,.08);
-    animation: modalIn .22s ease-out;
+.connection-pill{
+    padding:7px 11px;
+    border-radius:20px;
+    background:rgba(53,231,122,.06);
+    border:1px solid rgba(53,231,122,.12);
 }
 
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px) scale(.97);
+.profile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:5px 7px 5px 5px;
+    border-radius:13px;
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.045);
+}
+
+.avatar{
+    width:39px;
+    height:39px;
+    border-radius:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:900;
+    background:linear-gradient(135deg,#4264ff,#704eff);
+}
+
+.profile-name{
+    max-width:130px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:13px;
+    font-weight:800;
+}
+
+
+/* MESSAGES */
+
+.messages{
+    flex:1;
+    overflow-y:auto;
+    padding:28px;
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+    scroll-behavior:smooth;
+}
+
+.messages::-webkit-scrollbar{
+    width:7px;
+}
+
+.messages::-webkit-scrollbar-thumb{
+    background:#252c42;
+    border-radius:20px;
+}
+
+.empty{
+    margin:auto;
+    text-align:center;
+    color:#69748d;
+    line-height:1.7;
+    padding:35px;
+}
+
+.empty-icon{
+    font-size:45px;
+    margin-bottom:12px;
+    opacity:.7;
+}
+
+.empty-title{
+    color:#b0b8cb;
+    font-size:17px;
+    font-weight:900;
+}
+
+.message{
+    max-width:min(75%,650px);
+    padding:13px 15px;
+    border-radius:17px;
+    background:linear-gradient(145deg,rgba(30,36,54,.97),rgba(23,28,44,.97));
+    align-self:flex-start;
+    border:1px solid rgba(130,145,190,.08);
+    box-shadow:0 5px 18px rgba(0,0,0,.14);
+    animation:messageIn .22s ease;
+    overflow-wrap:anywhere;
+}
+
+.message.mine{
+    align-self:flex-end;
+    background:linear-gradient(135deg,#315cff,#574de8);
+    border-color:rgba(145,155,255,.22);
+    box-shadow:0 7px 24px rgba(52,74,235,.2);
+}
+
+@keyframes messageIn{
+    from{
+        opacity:0;
+        transform:translateY(5px);
+    }
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+.message-header{
+    display:flex;
+    align-items:center;
+    margin-bottom:6px;
+}
+
+.message-avatar{
+    width:27px;
+    height:27px;
+    border-radius:9px;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#536ff5,#7059e8);
+    font-size:10px;
+    font-weight:900;
+    margin-right:8px;
+}
+
+.message.mine .message-avatar{
+    background:rgba(255,255,255,.18);
+}
+
+.username{
+    font-size:12px;
+    font-weight:900;
+}
+
+.time{
+    opacity:.5;
+    font-size:10px;
+    margin-left:8px;
+}
+
+.sent{
+    font-size:9px;
+    margin-left:7px;
+    opacity:.7;
+}
+
+.message-text{
+    font-size:14px;
+    line-height:1.55;
+}
+
+
+/* COMPOSER */
+
+.composer{
+    padding:14px 17px;
+    background:rgba(13,17,29,.9);
+    backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:8px;
+}
+
+#message{
+    flex:1;
+    min-width:0;
+}
+
+input{
+    background:rgba(7,10,19,.8);
+    color:white;
+    border:1px solid rgba(100,115,150,.2);
+    border-radius:12px;
+    padding:13px;
+    outline:none;
+}
+
+input::placeholder{
+    color:#59647c;
+}
+
+input:focus{
+    border-color:rgba(86,115,255,.65);
+    box-shadow:0 0 0 3px rgba(75,100,255,.08);
+}
+
+.emoji-button{
+    width:48px;
+    border:1px solid rgba(100,115,160,.18);
+    border-radius:12px;
+    background:rgba(30,37,56,.8);
+    color:white;
+    font-size:20px;
+}
+
+.send-button{
+    border:0;
+    border-radius:12px;
+    padding:0 22px;
+    background:linear-gradient(135deg,#315cff,#6350ee);
+    color:white;
+    font-weight:900;
+}
+
+
+/* EMOJI */
+
+.emoji-panel{
+    position:absolute;
+    bottom:82px;
+    right:78px;
+    width:275px;
+    padding:13px;
+    background:rgba(19,24,39,.98);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(120,140,190,.18);
+    border-radius:16px;
+    display:none;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+    box-shadow:0 18px 55px rgba(0,0,0,.5);
+}
+
+.emoji-panel.show{
+    display:grid;
+}
+
+.emoji{
+    border:0;
+    background:transparent;
+    color:white;
+    font-size:21px;
+    padding:7px;
+    border-radius:8px;
+}
+
+.emoji:hover{
+    background:rgba(75,92,145,.3);
+    transform:scale(1.12);
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+    bottom:90px;
+    left:50%;
+    transform:translate(-50%,20px);
+    background:rgba(25,31,48,.97);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(120,140,190,.2);
+    padding:12px 18px;
+    border-radius:12px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:2000;
+    box-shadow:0 12px 35px rgba(0,0,0,.4);
+    font-size:13px;
+    font-weight:700;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* MODALS */
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(2,4,10,.74);
+    backdrop-filter:blur(10px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:20px;
+}
+
+.modal-overlay.show{
+    display:flex;
+}
+
+.modal{
+    width:min(460px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:linear-gradient(145deg,rgba(24,29,47,.99),rgba(14,18,31,.99));
+    border:1px solid rgba(120,140,190,.2);
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 25px 80px rgba(0,0,0,.65);
+}
+
+.modal h2{
+    margin:0 0 8px;
+    font-size:23px;
+}
+
+.modal p{
+    color:#7f8aa2;
+    font-size:13px;
+    line-height:1.6;
+    margin:0 0 18px;
+}
+
+.modal h3{
+    color:#9da7bc;
+    font-size:12px;
+    margin:20px 0 9px;
+}
+
+.modal input{
+    width:100%;
+    margin-bottom:14px;
+}
+
+.modal-buttons{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+}
+
+.cancel-button,
+.primary-button,
+.danger-button{
+    border-radius:10px;
+    padding:11px 16px;
+    font-weight:800;
+}
+
+.cancel-button{
+    border:1px solid rgba(100,115,150,.2);
+    background:rgba(30,37,55,.8);
+    color:white;
+}
+
+.primary-button{
+    border:0;
+    background:linear-gradient(135deg,#315cff,#6250ee);
+    color:white;
+}
+
+.danger-button{
+    border:1px solid rgba(255,79,104,.25);
+    background:rgba(255,55,80,.1);
+    color:#ff687d;
+}
+
+.danger-button:hover{
+    background:rgba(255,55,80,.18);
+}
+
+
+/* USER LIST */
+
+.user-list{
+    max-height:220px;
+    overflow-y:auto;
+    border:1px solid rgba(100,115,150,.18);
+    border-radius:12px;
+    margin-bottom:18px;
+    background:rgba(5,8,15,.35);
+}
+
+.user-option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px;
+    border-bottom:1px solid rgba(100,115,150,.1);
+    cursor:pointer;
+}
+
+.user-option:last-child{
+    border-bottom:0;
+}
+
+.user-option:hover{
+    background:rgba(55,70,110,.2);
+}
+
+.user-option input{
+    width:auto;
+    margin:0;
+    accent-color:#526cff;
+}
+
+.user-avatar-small{
+    width:31px;
+    height:31px;
+    border-radius:9px;
+    background:linear-gradient(135deg,#4264ff,#7256ec);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:900;
+}
+
+.everyone-option{
+    background:linear-gradient(90deg,rgba(52,76,190,.18),rgba(75,60,160,.08));
+}
+
+
+/* OWNER PANEL */
+
+.owner-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.owner-icon{
+    font-size:25px;
+}
+
+.owner-warning{
+    padding:13px;
+    border-radius:11px;
+    background:rgba(255,193,61,.06);
+    border:1px solid rgba(255,193,61,.15);
+    color:#cbb27a;
+    font-size:11px;
+    line-height:1.6;
+    margin:18px 0;
+}
+
+.owner-section{
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:13px;
+    background:rgba(255,255,255,.02);
+    margin-bottom:12px;
+}
+
+.owner-section-title{
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:5px;
+}
+
+.owner-section-text{
+    color:#748099;
+    font-size:11px;
+    line-height:1.5;
+}
+
+.owner-clear{
+    width:100%;
+    padding:13px;
+    border-radius:11px;
+    border:1px solid rgba(255,79,104,.25);
+    background:rgba(255,60,80,.1);
+    color:#ff6579;
+    font-weight:900;
+    margin-top:10px;
+}
+
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+    .sidebar{
+        width:72px;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.modal h2 {
-    margin: 0 0 8px;
-    font-size: 23px;
-}
-
-.modal h3 {
-    font-size: 13px;
-    color: #9da7bc;
-    margin: 20px 0 9px;
-}
-
-.modal p {
-    color: #7f8aa2;
-    font-size: 13px;
-    line-height: 1.6;
-    margin: 0 0 18px;
-}
-
-.modal input {
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.cancel-button {
-    border: 1px solid rgba(100,115,150,.2);
-    background: rgba(30,37,55,.8);
-    color: white;
-    border-radius: 10px;
-    padding: 11px 16px;
-    transition: .18s;
-}
-
-.cancel-button:hover {
-    background: rgba(46,54,77,.9);
-}
-
-.primary-button {
-    border: none;
-    background:
-        linear-gradient(
-            135deg,
-            #315cff,
-            #6250ee
-        );
-    color: white;
-    border-radius: 10px;
-    padding: 11px 17px;
-    font-weight: 800;
-    box-shadow:
-        0 5px 18px rgba(54,76,235,.2);
-    transition: .18s;
-}
-
-.primary-button:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-}
-
-
-/* =========================================
-   USER LIST
-   ========================================= */
-
-.user-list {
-    max-height: 220px;
-    overflow-y: auto;
-    border: 1px solid rgba(100,115,150,.18);
-    border-radius: 12px;
-    margin-bottom: 18px;
-    background: rgba(5,8,15,.35);
-}
-
-.user-list::-webkit-scrollbar {
-    width: 5px;
-}
-
-.user-list::-webkit-scrollbar-thumb {
-    background: #2a3248;
-    border-radius: 10px;
-}
-
-.user-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px;
-    border-bottom: 1px solid rgba(100,115,150,.1);
-    cursor: pointer;
-    transition: .15s;
-}
-
-.user-option:last-child {
-    border-bottom: none;
-}
-
-.user-option:hover {
-    background: rgba(55,70,110,.2);
-}
-
-.user-option input {
-    width: auto;
-    margin: 0;
-    accent-color: #526cff;
-}
-
-.user-avatar-small {
-    width: 31px;
-    height: 31px;
-    border-radius: 9px;
-    background:
-        linear-gradient(
-            135deg,
-            #4264ff,
-            #7256ec
-        );
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 900;
-    flex-shrink: 0;
-}
-
-.everyone-option {
-    background:
-        linear-gradient(
-            90deg,
-            rgba(52,76,190,.18),
-            rgba(75,60,160,.08)
-        );
-}
-
-.everyone-option:hover {
-    background:
-        linear-gradient(
-            90deg,
-            rgba(63,88,220,.24),
-            rgba(80,65,175,.12)
-        );
-}
-
-
-/* =========================================
-   NAME SETUP
-   ========================================= */
-
-.name-modal {
-    text-align: center;
-}
-
-.big-logo {
-    font-size: 34px;
-    font-weight: 950;
-    margin-bottom: 13px;
-    letter-spacing: -1px;
-    text-shadow:
-        0 0 25px rgba(80,105,255,.15);
-}
-
-.big-logo span {
-    color: #667eff;
-}
-
-
-/* =========================================
-   MOBILE
-   ========================================= */
-
-@media (max-width: 700px) {
-
-    .sidebar {
-        width: 72px;
+    .logo{
+        padding:19px 8px;
+        justify-content:center;
+        font-size:0;
     }
 
-    .logo {
-        padding: 19px 8px;
-        justify-content: center;
-        font-size: 0;
-    }
-
-    .logo::before {
-        content: "💬";
-        font-size: 25px;
+    .logo::before{
+        font-size:25px;
     }
 
     .logo span,
     .version,
-    .rooms-title {
-        display: none;
+    .rooms-title,
+    .user-card-info,
+    .owner-badge{
+        display:none;
     }
 
-    .room {
-        justify-content: center;
-        margin: 5px;
-        padding: 12px 5px;
+    .room{
+        justify-content:center;
+        margin:5px;
+        padding:8px 5px;
     }
 
-    .room > span:last-child {
-        display: none;
+    .room-name-small,
+    .shared-dot{
+        display:none;
     }
 
-    .room-icon {
-        width: 42px;
-        height: 42px;
-        font-size: 20px;
+    .room-icon{
+        width:43px;
+        height:43px;
+        font-size:20px;
     }
 
-    .create-chat {
-        font-size: 0;
-        padding: 12px 5px;
+    .create-chat{
+        font-size:0;
+        padding:12px 5px;
     }
 
-    .create-chat::before {
-        content: "+";
-        font-size: 26px;
+    .create-chat::before{
+        content:"+";
+        font-size:26px;
     }
 
-    .no-chats {
-        display: none;
+    .user-card{
+        justify-content:center;
+        padding:7px;
     }
 
-    .topbar {
-        padding: 12px 14px;
+    .user-card-avatar{
+        width:43px;
+        height:43px;
     }
 
-    .room-name {
-        font-size: 16px;
+    .topbar{
+        padding:10px 12px;
     }
 
-    .profile {
-        background: transparent;
-        border: none;
-        padding: 0;
+    .room-name{
+        font-size:16px;
     }
 
-    .profile-name {
-        display: none;
+    .connection-pill{
+        display:none;
     }
 
-    .avatar {
-        width: 38px;
-        height: 38px;
+    .profile{
+        background:transparent;
+        border:0;
+        padding:0;
     }
 
-    .messages {
-        padding: 18px 12px;
+    .profile-name{
+        display:none;
     }
 
-    .message {
-        max-width: 88%;
+    .messages{
+        padding:18px 12px;
     }
 
-    .composer {
-        padding: 10px;
+    .message{
+        max-width:88%;
     }
 
-    .send-button {
-        padding: 0 15px;
+    .composer{
+        padding:9px;
     }
 
-    .emoji-panel {
-        right: 9px;
-        bottom: 72px;
-        width: 260px;
+    .send-button{
+        padding:0 15px;
     }
 
-    .modal {
-        padding: 20px;
+    .emoji-panel{
+        right:9px;
+        bottom:72px;
+        width:260px;
+    }
+
+    .login-card{
+        padding:25px;
     }
 }
-
 </style>
 </head>
 
 <body>
 
-<div class="app">
+
+<!-- LOGIN / CREATE ACCOUNT -->
+
+<div id="loginScreen" class="login-screen">
+
+    <div class="login-card">
+
+        <div class="login-logo">
+            Vibe<span>Chat</span>
+        </div>
+
+        <div class="login-subtitle">
+            Chat with your friends. Anywhere.
+        </div>
+
+        <div class="auth-tabs">
+
+            <button
+                id="loginTab"
+                class="auth-tab active"
+                onclick="showAuth('login')"
+            >
+                Login
+            </button>
+
+            <button
+                id="createTab"
+                class="auth-tab"
+                onclick="showAuth('create')"
+            >
+                Create account
+            </button>
+
+        </div>
+
+
+        <label class="auth-label">
+            Username
+        </label>
+
+        <input
+            id="authUsername"
+            class="auth-input"
+            maxlength="24"
+            placeholder="Username"
+            autocomplete="username"
+        >
+
+
+        <label class="auth-label">
+            Password
+        </label>
+
+        <input
+            id="authPassword"
+            class="auth-input"
+            type="password"
+            maxlength="100"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
+
+
+        <button
+            id="authButton"
+            class="auth-button"
+            onclick="handleAuth()"
+        >
+            Login
+        </button>
+
+        <div
+            id="authError"
+            class="auth-error"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- APP -->
+
+<div
+    id="app"
+    class="app"
+    style="display:none"
+>
 
     <aside class="sidebar">
 
         <div class="logo">
             Vibe<span>Chat</span>
-            <span class="version">5.0</span>
+            <span class="version">
+                6.0
+            </span>
         </div>
+
 
         <div class="rooms-title">
             Your Chats
         </div>
 
-        <div id="rooms" class="rooms">
+
+        <div
+            id="rooms"
+            class="rooms"
+        >
 
             <div class="no-chats">
                 No chats yet.<br>
@@ -1124,12 +1179,48 @@ input:focus {
 
         </div>
 
+
         <button
             class="create-chat"
             onclick="openCreateChat()"
         >
             + Create Chat
         </button>
+
+
+        <div class="user-card">
+
+            <div
+                id="sidebarAvatar"
+                class="user-card-avatar"
+            >
+                ?
+            </div>
+
+            <div class="user-card-info">
+
+                <div
+                    id="sidebarName"
+                    class="user-card-name"
+                >
+                    Anonymous
+                </div>
+
+                <div class="user-card-status">
+                    ● Online
+                </div>
+
+            </div>
+
+            <div
+                id="sidebarOwnerBadge"
+                class="owner-badge"
+                style="display:none"
+            >
+                👑
+            </div>
+
+        </div>
 
     </aside>
 
@@ -1138,22 +1229,33 @@ input:focus {
 
         <header class="topbar">
 
-            <div>
+            <div class="chat-heading">
 
                 <div
-                    id="roomName"
-                    class="room-name"
+                    id="chatHeadingIcon"
+                    class="chat-heading-icon"
                 >
-                    Welcome to VibeChat
+                    💬
                 </div>
 
-                <div class="room-status">
+                <div>
 
-                    <span class="online-dot"></span>
+                    <div
+                        id="roomName"
+                        class="room-name"
+                    >
+                        Welcome to VibeChat
+                    </div>
 
-                    <span id="connectionStatus">
-                        Not connected
-                    </span>
+                    <div class="room-status">
+
+                        <span class="online-dot"></span>
+
+                        <span id="connectionStatus">
+                            Not connected
+                        </span>
+
+                    </div>
 
                 </div>
 
@@ -1176,6 +1278,13 @@ input:focus {
                     Anonymous
                 </div>
 
+                <div
+                    id="topOwnerBadge"
+                    style="display:none"
+                >
+                    👑
+                </div>
+
             </div>
 
         </header>
@@ -1190,7 +1299,19 @@ input:focus {
                 id="empty"
                 class="empty"
             >
-                Create a chat to get started.
+
+                <div class="empty-icon">
+                    💬
+                </div>
+
+                <div class="empty-title">
+                    Welcome to VibeChat
+                </div>
+
+                <div>
+                    Create a chat to get started.
+                </div>
+
             </div>
 
         </main>
@@ -1262,55 +1383,12 @@ input:focus {
 </div>
 
 
+<!-- TOAST -->
+
 <div
     id="toast"
     class="toast"
 ></div>
-
-
-<!-- NAME SETUP -->
-
-<div
-    id="nameModal"
-    class="modal-overlay"
->
-
-    <div class="modal name-modal">
-
-        <div class="big-logo">
-            Vibe<span>Chat</span>
-        </div>
-
-        <h2>
-            What is your name?
-        </h2>
-
-        <p>
-            Choose the name your friends
-            will see on VibeChat.
-        </p>
-
-        <input
-            id="firstNameInput"
-            maxlength="24"
-            placeholder="Enter your name"
-            autocomplete="nickname"
-        >
-
-        <div class="modal-buttons">
-
-            <button
-                class="primary-button"
-                onclick="saveFirstName()"
-            >
-                Continue
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
 
 
 <!-- CREATE CHAT -->
@@ -1327,10 +1405,8 @@ input:focus {
         </h2>
 
         <p>
-            Give your chat a name,
-            then choose who it is for.
-            It automatically becomes
-            available to them.
+            Give your chat a name, then choose
+            who should be able to see it.
         </p>
 
         <input
@@ -1371,10 +1447,99 @@ input:focus {
 </div>
 
 
+<!-- OWNER PANEL -->
+
+<div
+    id="ownerModal"
+    class="modal-overlay"
+>
+
+    <div class="modal">
+
+        <h2 class="owner-title">
+            <span class="owner-icon">👑</span>
+            Owner Panel
+        </h2>
+
+        <p>
+            VibeChat administration controls.
+        </p>
+
+
+        <div class="owner-section">
+
+            <div class="owner-section-title">
+                👑 Owner account
+            </div>
+
+            <div class="owner-section-text">
+                You are logged in as the VibeChat owner.
+            </div>
+
+        </div>
+
+
+        <div class="owner-section">
+
+            <div class="owner-section-title">
+                ⚠️ Reset everything
+            </div>
+
+            <div class="owner-section-text">
+                This removes local accounts and chats
+                on this device and broadcasts a reset
+                command to connected VibeChat clients.
+            </div>
+
+            <button
+                class="owner-clear"
+                onclick="confirmGlobalReset()"
+            >
+                🗑 Reset All Users & Chats
+            </button>
+
+        </div>
+
+
+        <div class="owner-warning">
+            Global reset cannot remove data from a
+            device that is offline. When that device
+            reconnects, its local data will remain.
+        </div>
+
+
+        <div class="modal-buttons">
+
+            <button
+                class="cancel-button"
+                onclick="closeOwnerPanel()"
+            >
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 <script>
 
+
 /* =========================================
-   VIBECHAT 5.0
+   OWNER CONFIG
+   ========================================= */
+
+const OWNER_USERNAME =
+    "Angusthe67man";
+
+const OWNER_PASSWORD =
+    "67DR67man@area67";
+
+
+/* =========================================
+   TOPICS
    ========================================= */
 
 const PRESENCE_TOPIC =
@@ -1383,11 +1548,26 @@ const PRESENCE_TOPIC =
 const CHAT_DIRECTORY_TOPIC =
     "vibechat-7f4k2m9x-chat-directory";
 
+const RESET_TOPIC =
+    "vibechat-7f4k2m9x-global-reset";
+
 const DIRECTORY_HEARTBEAT =
     15000;
 
 const PRESENCE_HEARTBEAT =
     15000;
+
+
+/* =========================================
+   DATA
+   ========================================= */
+
+let accounts =
+    JSON.parse(
+        localStorage.getItem(
+            "vibechat_accounts"
+        ) || "[]"
+    );
 
 let chats =
     JSON.parse(
@@ -1398,33 +1578,40 @@ let chats =
 
 let users = [];
 
-let currentChat = null;
-
-let eventSource = null;
-
-let presenceSource = null;
-
-let directorySource = null;
-
-let messageIds =
-    new Set();
-
-let directorySeen =
-    new Set();
-
-let directoryHeartbeatTimer =
-    null;
-
-let presenceHeartbeatTimer =
-    null;
-
 let myUsername =
     localStorage.getItem(
         "vibechat_username"
     ) || "";
 
+let currentChat = null;
 
-/* ELEMENTS */
+let eventSource = null;
+let presenceSource = null;
+let directorySource = null;
+let resetSource = null;
+
+let messageIds = new Set();
+let directorySeen = new Set();
+
+let directoryHeartbeatTimer = null;
+let presenceHeartbeatTimer = null;
+
+let authMode = "login";
+
+
+/* =========================================
+   ELEMENTS
+   ========================================= */
+
+const loginScreen =
+    document.getElementById(
+        "loginScreen"
+    );
+
+const app =
+    document.getElementById(
+        "app"
+    );
 
 const messagesContainer =
     document.getElementById(
@@ -1449,6 +1636,16 @@ const profileAvatar =
 const profileName =
     document.getElementById(
         "profileName"
+    );
+
+const sidebarAvatar =
+    document.getElementById(
+        "sidebarAvatar"
+    );
+
+const sidebarName =
+    document.getElementById(
+        "sidebarName"
     );
 
 const messageInput =
@@ -1478,10 +1675,60 @@ const roomsContainer =
 
 
 /* =========================================
+   OWNER DETECTION
+   ========================================= */
+
+function isOwner(){
+
+    return (
+        myUsername ===
+        OWNER_USERNAME
+    );
+
+}
+
+
+function updateOwnerUI(){
+
+    const sidebarBadge =
+        document.getElementById(
+            "sidebarOwnerBadge"
+        );
+
+    const topBadge =
+        document.getElementById(
+            "topOwnerBadge"
+        );
+
+
+    if(isOwner()){
+
+        sidebarBadge.style.display =
+            "block";
+
+        topBadge.style.display =
+            "block";
+
+    }
+
+    else{
+
+        sidebarBadge.style.display =
+            "none";
+
+        topBadge.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================
    PROFILE
    ========================================= */
 
-function updateProfile() {
+function updateProfile(){
 
     const name =
         myUsername.trim() ||
@@ -1491,9 +1738,277 @@ function updateProfile() {
         name;
 
     profileAvatar.textContent =
-        name
-            .charAt(0)
-            .toUpperCase();
+        name.charAt(0).toUpperCase();
+
+    sidebarName.textContent =
+        name;
+
+    sidebarAvatar.textContent =
+        name.charAt(0).toUpperCase();
+
+    updateOwnerUI();
+
+}
+
+
+/* =========================================
+   AUTH TABS
+   ========================================= */
+
+function showAuth(mode){
+
+    authMode = mode;
+
+    document
+        .getElementById("loginTab")
+        .classList.toggle(
+            "active",
+            mode === "login"
+        );
+
+    document
+        .getElementById("createTab")
+        .classList.toggle(
+            "active",
+            mode === "create"
+        );
+
+    document
+        .getElementById("authButton")
+        .textContent =
+            mode === "login"
+                ? "Login"
+                : "Create account";
+
+    document
+        .getElementById("authError")
+        .textContent = "";
+
+    document
+        .getElementById("authPassword")
+        .value = "";
+
+}
+
+
+/* =========================================
+   AUTH
+   ========================================= */
+
+function handleAuth(){
+
+    const username =
+        document
+            .getElementById(
+                "authUsername"
+            )
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById(
+                "authPassword"
+            )
+            .value;
+
+    const error =
+        document.getElementById(
+            "authError"
+        );
+
+
+    if(!username){
+
+        error.textContent =
+            "Enter a username.";
+
+        return;
+
+    }
+
+
+    if(!password){
+
+        error.textContent =
+            "Enter a password.";
+
+        return;
+
+    }
+
+
+    if(
+        username.length < 2
+    ){
+
+        error.textContent =
+            "Username is too short.";
+
+        return;
+
+    }
+
+
+    if(authMode === "create"){
+
+        const exists =
+            accounts.some(
+                account =>
+                    account.username
+                        .toLowerCase() ===
+                    username.toLowerCase()
+            );
+
+
+        if(exists){
+
+            error.textContent =
+                "That username already exists.";
+
+            return;
+
+        }
+
+
+        accounts.push({
+
+            username:
+                username,
+
+            password:
+                password,
+
+            createdAt:
+                Date.now()
+
+        });
+
+
+        localStorage.setItem(
+            "vibechat_accounts",
+            JSON.stringify(accounts)
+        );
+
+
+        loginUser(
+            username
+        );
+
+        return;
+
+    }
+
+
+    if(
+        username === OWNER_USERNAME &&
+        password === OWNER_PASSWORD
+    ){
+
+        loginUser(
+            username
+        );
+
+        return;
+
+    }
+
+
+    const account =
+        accounts.find(
+            item =>
+                item.username
+                    .toLowerCase() ===
+                username.toLowerCase()
+        );
+
+
+    if(
+        !account ||
+        account.password !== password
+    ){
+
+        error.textContent =
+            "Incorrect username or password.";
+
+        return;
+
+    }
+
+
+    loginUser(
+        account.username
+    );
+
+}
+
+
+/* =========================================
+   LOGIN
+   ========================================= */
+
+function loginUser(
+    username
+){
+
+    myUsername =
+        username;
+
+    localStorage.setItem(
+        "vibechat_username",
+        myUsername
+    );
+
+
+    loginScreen.style.display =
+        "none";
+
+    app.style.display =
+        "flex";
+
+
+    updateProfile();
+
+    startVibeChat();
+
+    showToast(
+        "👋 Welcome back, " +
+        myUsername
+    );
+
+}
+
+
+/* =========================================
+   LOGOUT
+   ========================================= */
+
+function logout(){
+
+    if(eventSource){
+        eventSource.close();
+        eventSource = null;
+    }
+
+    myUsername = "";
+
+    localStorage.removeItem(
+        "vibechat_username"
+    );
+
+    app.style.display =
+        "none";
+
+    loginScreen.style.display =
+        "flex";
+
+    document
+        .getElementById("authUsername")
+        .value = "";
+
+    document
+        .getElementById("authPassword")
+        .value = "";
 
 }
 
@@ -1502,7 +2017,7 @@ function updateProfile() {
    SAVE
    ========================================= */
 
-function saveChats() {
+function saveChats(){
 
     localStorage.setItem(
         "vibechat_chats",
@@ -1518,18 +2033,18 @@ function saveChats() {
 
 function randomId(
     length = 16
-) {
+){
 
     const chars =
         "abcdefghijklmnopqrstuvwxyz0123456789";
 
     let result = "";
 
-    for (
+    for(
         let i = 0;
         i < length;
         i++
-    ) {
+    ){
 
         result +=
             chars.charAt(
@@ -1550,7 +2065,7 @@ function randomId(
    ESCAPE
    ========================================= */
 
-function escapeHTML(text) {
+function escapeHTML(text){
 
     const div =
         document.createElement(
@@ -1571,15 +2086,15 @@ function escapeHTML(text) {
 
 function formatTime(
     timestamp
-) {
+){
 
     return new Date(
         timestamp
     ).toLocaleTimeString(
         [],
         {
-            hour: "2-digit",
-            minute: "2-digit"
+            hour:"2-digit",
+            minute:"2-digit"
         }
     );
 
@@ -1590,13 +2105,14 @@ function formatTime(
    RENDER CHATS
    ========================================= */
 
-function renderChats() {
+function renderChats(){
 
     roomsContainer.innerHTML = "";
 
-    if (
+
+    if(
         chats.length === 0
-    ) {
+    ){
 
         roomsContainer.innerHTML = `
             <div class="no-chats">
@@ -1629,11 +2145,8 @@ function renderChats() {
                 );
 
 
-            room.dataset.id =
-                chat.id;
-
-
             room.innerHTML = `
+
                 <span class="room-icon">
                     ${
                         chat.everyone
@@ -1642,11 +2155,18 @@ function renderChats() {
                     }
                 </span>
 
-                <span>
+                <span class="room-name-small">
                     ${escapeHTML(
                         chat.name
                     )}
                 </span>
+
+                ${
+                    chat.shared
+                        ? '<span class="shared-dot"></span>'
+                        : ''
+                }
+
             `;
 
 
@@ -1668,10 +2188,10 @@ function renderChats() {
 
 
 /* =========================================
-   CREATE MODAL
+   CREATE CHAT MODAL
    ========================================= */
 
-function openCreateChat() {
+function openCreateChat(){
 
     document
         .getElementById(
@@ -1679,9 +2199,7 @@ function openCreateChat() {
         )
         .value = "";
 
-
     renderUserList();
-
 
     document
         .getElementById(
@@ -1691,24 +2209,20 @@ function openCreateChat() {
             "show"
         );
 
-
     setTimeout(
-        () => {
-
+        () =>
             document
                 .getElementById(
                     "chatNameInput"
                 )
-                .focus();
-
-        },
+                .focus(),
         50
     );
 
 }
 
 
-function closeCreateChat() {
+function closeCreateChat(){
 
     document
         .getElementById(
@@ -1725,7 +2239,7 @@ function closeCreateChat() {
    USER LIST
    ========================================= */
 
-function renderUserList() {
+function renderUserList(){
 
     const list =
         document.getElementById(
@@ -1740,12 +2254,11 @@ function renderUserList() {
             "label"
         );
 
-
     everyone.className =
         "user-option everyone-option";
 
-
     everyone.innerHTML = `
+
         <input
             type="checkbox"
             id="everyoneCheck"
@@ -1759,8 +2272,8 @@ function renderUserList() {
         <strong>
             Everyone
         </strong>
-    `;
 
+    `;
 
     list.appendChild(
         everyone
@@ -1773,12 +2286,12 @@ function renderUserList() {
     users.forEach(
         name => {
 
-            if (
+            if(
                 name &&
                 !uniqueUsers.includes(
                     name
                 )
-            ) {
+            ){
 
                 uniqueUsers.push(
                     name
@@ -1790,12 +2303,12 @@ function renderUserList() {
     );
 
 
-    if (
+    if(
         myUsername &&
         !uniqueUsers.includes(
             myUsername
         )
-    ) {
+    ){
 
         uniqueUsers.push(
             myUsername
@@ -1817,22 +2330,16 @@ function renderUserList() {
                         "label"
                     );
 
-
                 label.className =
                     "user-option";
 
 
-                const safeName =
-                    escapeHTML(
-                        name
-                    );
-
-
                 label.innerHTML = `
+
                     <input
                         type="checkbox"
                         class="user-check"
-                        value="${safeName}"
+                        value="${escapeHTML(name)}"
                     >
 
                     <span class="user-avatar-small">
@@ -1844,14 +2351,14 @@ function renderUserList() {
                     </span>
 
                     <span>
-                        ${safeName}
-
+                        ${escapeHTML(name)}
                         ${
                             name === myUsername
                                 ? " (you)"
                                 : ""
                         }
                     </span>
+
                 `;
 
 
@@ -1869,7 +2376,7 @@ function renderUserList() {
    EVERYONE
    ========================================= */
 
-function toggleEveryone() {
+function toggleEveryone(){
 
     const everyone =
         document.getElementById(
@@ -1887,10 +2394,9 @@ function toggleEveryone() {
                 check.disabled =
                     everyone.checked;
 
-
-                if (
+                if(
                     everyone.checked
-                ) {
+                ){
 
                     check.checked =
                         false;
@@ -1907,7 +2413,7 @@ function toggleEveryone() {
    CREATE CHAT
    ========================================= */
 
-async function createChat() {
+async function createChat(){
 
     const name =
         document
@@ -1918,7 +2424,7 @@ async function createChat() {
             .trim();
 
 
-    if (!name) {
+    if(!name){
 
         showToast(
             "Enter a chat name"
@@ -1949,10 +2455,10 @@ async function createChat() {
         );
 
 
-    if (
+    if(
         !everyone &&
         selectedUsers.length === 0
-    ) {
+    ){
 
         showToast(
             "Choose who the chat is for"
@@ -1999,7 +2505,6 @@ async function createChat() {
         chat
     );
 
-
     saveChats();
 
     closeCreateChat();
@@ -2016,15 +2521,14 @@ async function createChat() {
     );
 
 
-    if (everyone) {
+    if(everyone){
 
         showToast(
-            "🌎 Chat is now visible to Everyone!"
+            "🌎 Chat is visible to Everyone!"
         );
 
     }
-
-    else {
+    else{
 
         showToast(
             "✓ Chat created and shared"
@@ -2039,7 +2543,7 @@ async function createChat() {
    SWITCH CHAT
    ========================================= */
 
-function switchChat(id) {
+function switchChat(id){
 
     const chat =
         chats.find(
@@ -2048,7 +2552,7 @@ function switchChat(id) {
         );
 
 
-    if (!chat) {
+    if(!chat){
         return;
     }
 
@@ -2069,6 +2573,16 @@ function switchChat(id) {
         chat.name;
 
 
+    document
+        .getElementById(
+            "chatHeadingIcon"
+        )
+        .textContent =
+            chat.everyone
+                ? "🌎"
+                : "💬";
+
+
     connectToChat();
 
 }
@@ -2078,9 +2592,9 @@ function switchChat(id) {
    CONNECT CHAT
    ========================================= */
 
-function connectToChat() {
+function connectToChat(){
 
-    if (eventSource) {
+    if(eventSource){
 
         eventSource.close();
 
@@ -2090,16 +2604,10 @@ function connectToChat() {
     }
 
 
-    if (!currentChat) {
+    if(!currentChat){
 
         connectionStatus.textContent =
             "Not connected";
-
-        messagesContainer.innerHTML = `
-            <div class="empty">
-                Create a chat to get started.
-            </div>
-        `;
 
         return;
 
@@ -2110,15 +2618,28 @@ function connectToChat() {
 
 
     messagesContainer.innerHTML = `
+
         <div
             id="empty"
             class="empty"
         >
-            Connecting to
-            ${escapeHTML(
-                currentChat.name
-            )}...
+
+            <div class="empty-icon">
+                ⏳
+            </div>
+
+            <div class="empty-title">
+                Connecting...
+            </div>
+
+            <div>
+                Joining ${escapeHTML(
+                    currentChat.name
+                )}
+            </div>
+
         </div>
+
     `;
 
 
@@ -2137,7 +2658,7 @@ function connectToChat() {
 
 
     eventSource.onopen =
-        function() {
+        function(){
 
             connectionStatus.textContent =
                 "Connected";
@@ -2146,7 +2667,7 @@ function connectToChat() {
 
 
     eventSource.onerror =
-        function() {
+        function(){
 
             connectionStatus.textContent =
                 "Reconnecting...";
@@ -2155,9 +2676,9 @@ function connectToChat() {
 
 
     eventSource.onmessage =
-        function(event) {
+        function(event){
 
-            try {
+            try{
 
                 const data =
                     JSON.parse(
@@ -2165,10 +2686,10 @@ function connectToChat() {
                     );
 
 
-                if (
+                if(
                     data.event !==
                     "message"
-                ) {
+                ){
 
                     return;
 
@@ -2184,9 +2705,9 @@ function connectToChat() {
                     raw.indexOf("|");
 
 
-                if (
+                if(
                     separator === -1
-                ) {
+                ){
 
                     return;
 
@@ -2239,7 +2760,7 @@ function connectToChat() {
                 );
 
 
-                if (!mine) {
+                if(!mine){
 
                     playNotificationSound();
 
@@ -2251,8 +2772,7 @@ function connectToChat() {
                 }
 
             }
-
-            catch(error) {
+            catch(error){
 
                 console.error(
                     "Message error:",
@@ -2276,11 +2796,11 @@ function addMessage(
     timestamp,
     mine,
     id
-) {
+){
 
-    if (
+    if(
         messageIds.has(id)
-    ) {
+    ){
 
         return;
 
@@ -2298,10 +2818,8 @@ function addMessage(
         );
 
 
-    if (oldEmpty) {
-
+    if(oldEmpty){
         oldEmpty.remove();
-
     }
 
 
@@ -2386,12 +2904,12 @@ function addMessage(
 
 chatForm.addEventListener(
     "submit",
-    async function(event) {
+    async function(event){
 
         event.preventDefault();
 
 
-        if (!currentChat) {
+        if(!currentChat){
 
             showToast(
                 "Create a chat first"
@@ -2411,12 +2929,12 @@ chatForm.addEventListener(
             messageInput.value.trim();
 
 
-        if (!text) {
+        if(!text){
             return;
         }
 
 
-        try {
+        try{
 
             const response =
                 await fetch(
@@ -2425,7 +2943,7 @@ chatForm.addEventListener(
                         currentChat.topic
                     ),
                     {
-                        method: "POST",
+                        method:"POST",
                         body:
                             username +
                             "|" +
@@ -2434,7 +2952,7 @@ chatForm.addEventListener(
                 );
 
 
-            if (!response.ok) {
+            if(!response.ok){
 
                 throw new Error(
                     "Message failed"
@@ -2448,14 +2966,12 @@ chatForm.addEventListener(
 
             messageInput.focus();
 
-
             showToast(
                 "✓ Message sent"
             );
 
         }
-
-        catch(error) {
+        catch(error){
 
             console.error(
                 error
@@ -2472,17 +2988,17 @@ chatForm.addEventListener(
 
 
 /* =========================================
-   DIRECTORY PUBLISH
+   DIRECTORY
    ========================================= */
 
 async function publishChatDirectory(
     chat
-) {
+){
 
-    if (
+    if(
         !chat ||
         !chat.shared
-    ) {
+    ){
 
         return;
 
@@ -2492,11 +3008,9 @@ async function publishChatDirectory(
     const payload =
         JSON.stringify({
 
-            type:
-                "chat",
+            type:"chat",
 
-            version:
-                5,
+            version:6,
 
             id:
                 chat.id,
@@ -2507,8 +3021,7 @@ async function publishChatDirectory(
             topic:
                 chat.topic,
 
-            shared:
-                true,
+            shared:true,
 
             everyone:
                 chat.everyone === true,
@@ -2535,32 +3048,21 @@ async function publishChatDirectory(
         });
 
 
-    try {
+    try{
 
-        const response =
-            await fetch(
-                "https://ntfy.sh/" +
-                encodeURIComponent(
-                    CHAT_DIRECTORY_TOPIC
-                ),
-                {
-                    method: "POST",
-                    body: payload
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Directory publish failed"
-            );
-
-        }
+        await fetch(
+            "https://ntfy.sh/" +
+            encodeURIComponent(
+                CHAT_DIRECTORY_TOPIC
+            ),
+            {
+                method:"POST",
+                body:payload
+            }
+        );
 
     }
-
-    catch(error) {
+    catch(error){
 
         console.log(
             "Directory update failed:",
@@ -2572,11 +3074,7 @@ async function publishChatDirectory(
 }
 
 
-/* =========================================
-   SHARED CHAT HEARTBEAT
-   ========================================= */
-
-async function publishAllSharedChats() {
+async function publishAllSharedChats(){
 
     const sharedChats =
         chats.filter(
@@ -2585,9 +3083,9 @@ async function publishAllSharedChats() {
         );
 
 
-    for (
+    for(
         const chat of sharedChats
-    ) {
+    ){
 
         await publishChatDirectory(
             chat
@@ -2598,7 +3096,7 @@ async function publishAllSharedChats() {
 }
 
 
-function startDirectoryHeartbeat() {
+function startDirectoryHeartbeat(){
 
     clearInterval(
         directoryHeartbeatTimer
@@ -2607,11 +3105,7 @@ function startDirectoryHeartbeat() {
 
     directoryHeartbeatTimer =
         setInterval(
-            function() {
-
-                publishAllSharedChats();
-
-            },
+            publishAllSharedChats,
             DIRECTORY_HEARTBEAT
         );
 
@@ -2625,14 +3119,14 @@ function startDirectoryHeartbeat() {
    PRESENCE
    ========================================= */
 
-async function announcePresence() {
+async function announcePresence(){
 
-    if (!myUsername) {
+    if(!myUsername){
         return;
     }
 
 
-    try {
+    try{
 
         await fetch(
             "https://ntfy.sh/" +
@@ -2640,12 +3134,11 @@ async function announcePresence() {
                 PRESENCE_TOPIC
             ),
             {
-                method: "POST",
+                method:"POST",
                 body:
                     JSON.stringify({
 
-                        type:
-                            "user",
+                        type:"user",
 
                         name:
                             myUsername,
@@ -2658,8 +3151,7 @@ async function announcePresence() {
         );
 
     }
-
-    catch(error) {
+    catch(error){
 
         console.log(
             "Presence failed:",
@@ -2671,7 +3163,7 @@ async function announcePresence() {
 }
 
 
-function startPresenceHeartbeat() {
+function startPresenceHeartbeat(){
 
     clearInterval(
         presenceHeartbeatTimer
@@ -2680,11 +3172,7 @@ function startPresenceHeartbeat() {
 
     presenceHeartbeatTimer =
         setInterval(
-            function() {
-
-                announcePresence();
-
-            },
+            announcePresence,
             PRESENCE_HEARTBEAT
         );
 
@@ -2695,9 +3183,9 @@ function startPresenceHeartbeat() {
    CONNECT PRESENCE
    ========================================= */
 
-function connectPresence() {
+function connectPresence(){
 
-    if (presenceSource) {
+    if(presenceSource){
 
         presenceSource.close();
 
@@ -2715,9 +3203,9 @@ function connectPresence() {
 
 
     presenceSource.onmessage =
-        function(event) {
+        function(event){
 
-            try {
+            try{
 
                 const data =
                     JSON.parse(
@@ -2725,10 +3213,10 @@ function connectPresence() {
                     );
 
 
-                if (
+                if(
                     data.event !==
                     "message"
-                ) {
+                ){
 
                     return;
 
@@ -2741,22 +3229,22 @@ function connectPresence() {
                     );
 
 
-                if (
+                if(
                     user.type !==
                     "user"
-                ) {
+                ){
 
                     return;
 
                 }
 
 
-                if (
+                if(
                     user.name &&
                     !users.includes(
                         user.name
                     )
-                ) {
+                ){
 
                     users.push(
                         user.name
@@ -2767,11 +3255,10 @@ function connectPresence() {
                 }
 
             }
-
-            catch(error) {
+            catch(error){
 
                 console.log(
-                    "Presence message error:",
+                    "Presence error:",
                     error
                 );
 
@@ -2783,12 +3270,12 @@ function connectPresence() {
 
 
 /* =========================================
-   CONNECT DIRECTORY
+   DIRECTORY CONNECTION
    ========================================= */
 
-function connectDirectory() {
+function connectDirectory(){
 
-    if (directorySource) {
+    if(directorySource){
 
         directorySource.close();
 
@@ -2806,9 +3293,9 @@ function connectDirectory() {
 
 
     directorySource.onmessage =
-        function(event) {
+        function(event){
 
-            try {
+            try{
 
                 const data =
                     JSON.parse(
@@ -2816,10 +3303,10 @@ function connectDirectory() {
                     );
 
 
-                if (
+                if(
                     data.event !==
                     "message"
-                ) {
+                ){
 
                     return;
 
@@ -2832,21 +3319,21 @@ function connectDirectory() {
                     );
 
 
-                if (
+                if(
                     chat.type !==
                     "chat"
-                ) {
+                ){
 
                     return;
 
                 }
 
 
-                if (
+                if(
                     !chat.id ||
                     !chat.topic ||
                     !chat.name
-                ) {
+                ){
 
                     return;
 
@@ -2873,10 +3360,8 @@ function connectDirectory() {
                     );
 
 
-                if (!allowed) {
-
+                if(!allowed){
                     return;
-
                 }
 
 
@@ -2889,11 +3374,11 @@ function connectDirectory() {
                     );
 
 
-                if (
+                if(
                     directorySeen.has(
                         announcementId
                     )
-                ) {
+                ){
 
                     return;
 
@@ -2913,7 +3398,7 @@ function connectDirectory() {
                     );
 
 
-                if (existing) {
+                if(existing){
 
                     existing.name =
                         chat.name;
@@ -2930,10 +3415,6 @@ function connectDirectory() {
                     existing.users =
                         chatUsers;
 
-                    existing.createdBy =
-                        chat.createdBy ||
-                        existing.createdBy;
-
                     saveChats();
 
                     renderChats();
@@ -2943,7 +3424,7 @@ function connectDirectory() {
                 }
 
 
-                const joinedChat = {
+                chats.push({
 
                     id:
                         chat.id,
@@ -2954,8 +3435,7 @@ function connectDirectory() {
                     topic:
                         chat.topic,
 
-                    shared:
-                        true,
+                    shared:true,
 
                     everyone:
                         everyone,
@@ -2971,12 +3451,7 @@ function connectDirectory() {
                         chat.createdAt ||
                         Date.now()
 
-                };
-
-
-                chats.push(
-                    joinedChat
-                );
+                });
 
 
                 saveChats();
@@ -2993,8 +3468,7 @@ function connectDirectory() {
                 );
 
             }
-
-            catch(error) {
+            catch(error){
 
                 console.log(
                     "Directory error:",
@@ -3009,10 +3483,315 @@ function connectDirectory() {
 
 
 /* =========================================
+   GLOBAL RESET CONNECTION
+   ========================================= */
+
+function connectResetListener(){
+
+    if(resetSource){
+
+        resetSource.close();
+
+    }
+
+
+    resetSource =
+        new EventSource(
+            "https://ntfy.sh/" +
+            encodeURIComponent(
+                RESET_TOPIC
+            ) +
+            "/sse"
+        );
+
+
+    resetSource.onmessage =
+        function(event){
+
+            try{
+
+                const data =
+                    JSON.parse(
+                        event.data
+                    );
+
+
+                if(
+                    data.event !==
+                    "message"
+                ){
+
+                    return;
+
+                }
+
+
+                const reset =
+                    JSON.parse(
+                        data.message
+                    );
+
+
+                if(
+                    reset.type !==
+                    "global-reset"
+                ){
+
+                    return;
+
+                }
+
+
+                if(
+                    reset.by ===
+                    myUsername
+                ){
+
+                    return;
+
+                }
+
+
+                performLocalReset(
+                    false
+                );
+
+
+                showToast(
+                    "⚠️ VibeChat was reset by the owner"
+                );
+
+            }
+            catch(error){
+
+                console.log(
+                    "Reset message error:",
+                    error
+                );
+
+            }
+
+        };
+
+}
+
+
+/* =========================================
+   OWNER RESET
+   ========================================= */
+
+async function confirmGlobalReset(){
+
+    if(!isOwner()){
+
+        showToast(
+            "⛔ Owner access required"
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "WARNING!\n\nThis will clear all local VibeChat accounts and chats on this device and broadcast a reset to connected users.\n\nContinue?"
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    try{
+
+        await fetch(
+            "https://ntfy.sh/" +
+            encodeURIComponent(
+                RESET_TOPIC
+            ),
+            {
+                method:"POST",
+                body:
+                    JSON.stringify({
+
+                        type:
+                            "global-reset",
+
+                        by:
+                            myUsername,
+
+                        resetId:
+                            randomId(16),
+
+                        time:
+                            Date.now()
+
+                    })
+            }
+        );
+
+    }
+    catch(error){
+
+        console.log(
+            "Reset broadcast failed:",
+            error
+        );
+
+    }
+
+
+    performLocalReset(
+        true
+    );
+
+}
+
+
+function performLocalReset(
+    ownerReset
+){
+
+    if(eventSource){
+
+        eventSource.close();
+
+        eventSource = null;
+
+    }
+
+
+    chats = [];
+
+    users = [];
+
+    currentChat = null;
+
+    messageIds.clear();
+
+    directorySeen.clear();
+
+
+    localStorage.removeItem(
+        "vibechat_chats"
+    );
+
+    localStorage.removeItem(
+        "vibechat_username"
+    );
+
+    localStorage.removeItem(
+        "vibechat_accounts"
+    );
+
+
+    renderChats();
+
+
+    messagesContainer.innerHTML = `
+
+        <div
+            id="empty"
+            class="empty"
+        >
+
+            <div class="empty-icon">
+                💬
+            </div>
+
+            <div class="empty-title">
+                VibeChat has been reset
+            </div>
+
+            <div>
+                Create a new account to continue.
+            </div>
+
+        </div>
+
+    `;
+
+
+    closeOwnerPanel();
+
+
+    myUsername = "";
+
+    updateProfile();
+
+
+    app.style.display =
+        "none";
+
+    loginScreen.style.display =
+        "flex";
+
+
+    showAuth("login");
+
+
+    if(ownerReset){
+
+        document
+            .getElementById(
+                "authError"
+            )
+            .textContent =
+                "All local VibeChat data was reset.";
+
+    }
+
+}
+
+
+/* =========================================
+   OWNER PANEL
+   ========================================= */
+
+function openOwnerPanel(){
+
+    if(!isOwner()){
+
+        showToast(
+            "⛔ Owner access required"
+        );
+
+        return;
+
+    }
+
+
+    document
+        .getElementById(
+            "ownerModal"
+        )
+        .classList.add(
+            "show"
+        );
+
+}
+
+
+function closeOwnerPanel(){
+
+    document
+        .getElementById(
+            "ownerModal"
+        )
+        .classList.remove(
+            "show"
+        );
+
+}
+
+
+/* =========================================
    EMOJIS
    ========================================= */
 
-function toggleEmoji() {
+function toggleEmoji(){
 
     emojiPanel.classList.toggle(
         "show"
@@ -3023,7 +3802,7 @@ function toggleEmoji() {
 
 function addEmoji(
     emoji
-) {
+){
 
     messageInput.value +=
         emoji;
@@ -3035,16 +3814,16 @@ function addEmoji(
 
 document.addEventListener(
     "click",
-    function(event) {
+    function(event){
 
-        if (
+        if(
             !emojiPanel.contains(
                 event.target
             ) &&
             !event.target.closest(
                 ".emoji-button"
             )
-        ) {
+        ){
 
             emojiPanel.classList.remove(
                 "show"
@@ -3065,11 +3844,10 @@ let toastTimer;
 
 function showToast(
     text
-) {
+){
 
     toast.textContent =
         text;
-
 
     toast.classList.add(
         "show"
@@ -3083,7 +3861,7 @@ function showToast(
 
     toastTimer =
         setTimeout(
-            function() {
+            function(){
 
                 toast.classList.remove(
                     "show"
@@ -3103,14 +3881,14 @@ function showToast(
 let audioContext = null;
 
 
-function playNotificationSound() {
+function playNotificationSound(){
 
-    try {
+    try{
 
-        if (!audioContext) {
+        if(!audioContext){
 
             audioContext =
-                new (
+                new(
                     window.AudioContext ||
                     window.webkitAudioContext
                 )();
@@ -3118,10 +3896,10 @@ function playNotificationSound() {
         }
 
 
-        if (
+        if(
             audioContext.state ===
             "suspended"
-        ) {
+        ){
 
             audioContext.resume();
 
@@ -3131,7 +3909,6 @@ function playNotificationSound() {
         const oscillator =
             audioContext.createOscillator();
 
-
         const gain =
             audioContext.createGain();
 
@@ -3139,26 +3916,25 @@ function playNotificationSound() {
         oscillator.type =
             "sine";
 
-
         oscillator.frequency.value =
             660;
 
 
         gain.gain.setValueAtTime(
-            0.0001,
+            .0001,
             audioContext.currentTime
         );
 
 
         gain.gain.exponentialRampToValueAtTime(
-            0.08,
-            audioContext.currentTime + 0.01
+            .08,
+            audioContext.currentTime + .01
         );
 
 
         gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            audioContext.currentTime + 0.16
+            .0001,
+            audioContext.currentTime + .16
         );
 
 
@@ -3174,12 +3950,11 @@ function playNotificationSound() {
 
         oscillator.stop(
             audioContext.currentTime +
-            0.17
+            .17
         );
 
     }
-
-    catch(error) {
+    catch(error){
 
         console.log(
             "Sound unavailable"
@@ -3194,21 +3969,20 @@ function playNotificationSound() {
    BROWSER NOTIFICATIONS
    ========================================= */
 
-async function requestNotifications() {
+async function requestNotifications(){
 
-    if (
+    if(
         "Notification" in window &&
         Notification.permission ===
         "default"
-    ) {
+    ){
 
-        try {
+        try{
 
             await Notification.requestPermission();
 
         }
-
-        catch(error) {
+        catch(error){
 
             console.log(
                 error
@@ -3224,31 +3998,31 @@ async function requestNotifications() {
 function showBrowserNotification(
     username,
     text
-) {
+){
 
-    if (
+    if(
         !("Notification" in window)
-    ) {
+    ){
 
         return;
 
     }
 
 
-    if (
+    if(
         Notification.permission !==
         "granted"
-    ) {
+    ){
 
         return;
 
     }
 
 
-    if (
+    if(
         document.visibilityState ===
         "visible"
-    ) {
+    ){
 
         return;
 
@@ -3259,11 +4033,8 @@ function showBrowserNotification(
         "VibeChat — " +
         username,
         {
-            body:
-                text,
-
-            tag:
-                "vibechat-message"
+            body:text,
+            tag:"vibechat-message"
         }
     );
 
@@ -3271,10 +4042,10 @@ function showBrowserNotification(
 
 
 /* =========================================
-   START
+   START VIBECHAT
    ========================================= */
 
-function startVibeChat() {
+function startVibeChat(){
 
     updateProfile();
 
@@ -3284,88 +4055,44 @@ function startVibeChat() {
 
     connectDirectory();
 
+    connectResetListener();
+
     startPresenceHeartbeat();
 
     startDirectoryHeartbeat();
 
+    requestNotifications();
+
 }
 
 
-function checkFirstTime() {
+/* =========================================
+   OWNER PANEL HOTKEY
+   ========================================= */
 
-    if (!myUsername) {
+document.addEventListener(
+    "keydown",
+    function(event){
 
-        document
-            .getElementById(
-                "nameModal"
-            )
-            .classList.add(
-                "show"
-            );
+        if(
+            event.ctrlKey &&
+            event.shiftKey &&
+            event.key.toLowerCase() ===
+            "o"
+        ){
 
-        return;
+            event.preventDefault();
+
+            if(isOwner()){
+
+                openOwnerPanel();
+
+            }
+
+        }
 
     }
-
-
-    startVibeChat();
-
-}
-
-
-function saveFirstName() {
-
-    const input =
-        document.getElementById(
-            "firstNameInput"
-        );
-
-
-    const name =
-        input.value.trim();
-
-
-    if (!name) {
-
-        input.focus();
-
-        showToast(
-            "Please enter your name"
-        );
-
-        return;
-
-    }
-
-
-    myUsername =
-        name;
-
-
-    localStorage.setItem(
-        "vibechat_username",
-        name
-    );
-
-
-    document
-        .getElementById(
-            "nameModal"
-        )
-        .classList.remove(
-            "show"
-        );
-
-
-    startVibeChat();
-
-
-    showToast(
-        "👋 Welcome to VibeChat, " +
-        name
-    );
-
-}
+);
 
 
 /* =========================================
@@ -3374,12 +4101,12 @@ function saveFirstName() {
 
 document.addEventListener(
     "keydown",
-    function(event) {
+    function(event){
 
-        if (
+        if(
             event.key ===
             "Escape"
-        ) {
+        ){
 
             emojiPanel.classList.remove(
                 "show"
@@ -3387,33 +4114,35 @@ document.addEventListener(
 
             closeCreateChat();
 
+            closeOwnerPanel();
+
         }
 
 
-        if (
+        if(
             event.key ===
             "Enter" &&
             document.activeElement ===
             document.getElementById(
-                "firstNameInput"
+                "authPassword"
             )
-        ) {
+        ){
 
             event.preventDefault();
 
-            saveFirstName();
+            handleAuth();
 
         }
 
 
-        if (
+        if(
             event.key ===
             "Enter" &&
             document.activeElement ===
             document.getElementById(
                 "chatNameInput"
             )
-        ) {
+        ){
 
             event.preventDefault();
 
@@ -3422,13 +4151,13 @@ document.addEventListener(
         }
 
 
-        if (
+        if(
             event.key ===
             "Enter" &&
             document.activeElement ===
             messageInput &&
             !event.shiftKey
-        ) {
+        ){
 
             event.preventDefault();
 
@@ -3441,16 +4170,67 @@ document.addEventListener(
 
 
 /* =========================================
-   START
+   LOGIN ENTER
    ========================================= */
 
-renderChats();
+document
+    .getElementById(
+        "authUsername"
+    )
+    .addEventListener(
+        "keydown",
+        function(event){
 
-updateProfile();
+            if(
+                event.key === "Enter"
+            ){
 
-requestNotifications();
+                event.preventDefault();
 
-checkFirstTime();
+                handleAuth();
+
+            }
+
+        }
+    );
+
+
+/* =========================================
+   STARTUP
+   ========================================= */
+
+function startup(){
+
+    renderChats();
+
+    updateProfile();
+
+
+    if(myUsername){
+
+        app.style.display =
+            "flex";
+
+        loginScreen.style.display =
+            "none";
+
+        startVibeChat();
+
+    }
+    else{
+
+        app.style.display =
+            "none";
+
+        loginScreen.style.display =
+            "flex";
+
+    }
+
+}
+
+
+startup();
 
 </script>
 
