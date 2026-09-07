@@ -1638,16 +1638,16 @@ const OWNER_PASSWORD =
    ========================================= */
 
 const PRESENCE_TOPIC =
-    "vibechat-fresh-9q8w7e-users";
+    "vibechat-fresh-4n7x2p-users";
 
 const CHAT_DIRECTORY_TOPIC =
-    "vibechat-fresh-9q8w7e-directory";
+    "vibechat-fresh-4n7x2p-directory";
 
 const RESET_TOPIC =
-    "vibechat-fresh-9q8w7e-reset";
+    "vibechat-fresh-4n7x2p-reset";
 
 const CHAT_DELETE_TOPIC =
-    "vibechat-fresh-9q8w7e-delete";
+    "vibechat-fresh-4n7x2p-delete";
 
 const DIRECTORY_HEARTBEAT =
     30000;
@@ -1656,7 +1656,7 @@ const PRESENCE_HEARTBEAT =
     30000;
 
 const VIBECHAT_DATA_VERSION =
-    "fresh-ntfy-2026-09-07-v1";
+    "fresh-ntfy-2026-09-07-v2";
 
 
 /* =========================================
@@ -2684,7 +2684,7 @@ async function createChat(){
             name,
 
         topic:
-            "vibechat-7f4k2m9x-" +
+            "vibechat-fresh-4n7x2p-chat-" +
             randomId(20),
 
         shared:
@@ -2717,14 +2717,28 @@ async function createChat(){
 
     renderChats();
 
+    connectionStatus.textContent =
+        "Publishing chat...";
+
+    const published =
+        await publishChatDirectory(
+            chat
+        );
+
     switchChat(
         chat.id
     );
 
-
-    await publishChatDirectory(
-        chat
-    );
+    if(published){
+        showToast(
+            "✅ Chat created and published"
+        );
+    }
+    else{
+        showToast(
+            "⚠️ Chat was created here, but ntfy could not publish it"
+        );
+    }
 
 
     if(everyone){
@@ -3309,16 +3323,24 @@ async function publishChatDirectory(
 
     try{
 
-        await fetch(
-            "https://ntfy.sh/" +
-            encodeURIComponent(
-                CHAT_DIRECTORY_TOPIC
-            ),
-            {
-                method:"POST",
-                body:payload
-            }
-        );
+        const response =
+            await fetch(
+                "https://ntfy.sh/" +
+                encodeURIComponent(
+                    CHAT_DIRECTORY_TOPIC
+                ),
+                {
+                    method:"POST",
+                    body:payload,
+                    cache:"no-store"
+                }
+            );
+
+        if(!response.ok){
+            throw new Error("ntfy returned HTTP " + response.status);
+        }
+
+        return true;
 
     }
     catch(error){
@@ -3327,6 +3349,8 @@ async function publishChatDirectory(
             "Directory update failed:",
             error
         );
+
+        return false;
 
     }
 
@@ -4057,7 +4081,16 @@ function connectGlobalStreams(){
         }
     };
 
+    globalSource.onopen = function(){
+        if(!currentChat){
+            connectionStatus.textContent = "Connected to VibeChat";
+        }
+    };
+
     globalSource.onerror = function(){
+        if(!currentChat){
+            connectionStatus.textContent = "Reconnecting...";
+        }
         // EventSource automatically reconnects.
         // Keep this stream separate from the active chat stream.
     };
@@ -4629,6 +4662,10 @@ async function startVibeChat(){
 
     await loadAllExistingChats();
     connectGlobalStreams();
+
+    // Refresh the directory once after the live stream is connected so a
+    // chat published during startup is not missed.
+    setTimeout(loadAllExistingChats, 1000);
 
     announcePresence();
 
