@@ -1501,7 +1501,7 @@ input:focus{
 
         <p>
             Give your chat a name, then choose
-            who should be able to see it.
+            who should be able to see it. Only the owner can create chats.
         </p>
 
         <input
@@ -1638,22 +1638,25 @@ const OWNER_PASSWORD =
    ========================================= */
 
 const PRESENCE_TOPIC =
-    "vibechat-7f4k2m9x-users";
+    "vibechat-fresh-9q8w7e-users";
 
 const CHAT_DIRECTORY_TOPIC =
-    "vibechat-7f4k2m9x-chat-directory";
+    "vibechat-fresh-9q8w7e-directory";
 
 const RESET_TOPIC =
-    "vibechat-7f4k2m9x-global-reset";
+    "vibechat-fresh-9q8w7e-reset";
 
 const CHAT_DELETE_TOPIC =
-    "vibechat-7f4k2m9x-chat-delete";
+    "vibechat-fresh-9q8w7e-delete";
 
 const DIRECTORY_HEARTBEAT =
     30000;
 
 const PRESENCE_HEARTBEAT =
     30000;
+
+const VIBECHAT_DATA_VERSION =
+    "fresh-ntfy-2026-09-07-v1";
 
 
 /* =========================================
@@ -1666,6 +1669,15 @@ let accounts =
             "vibechat_accounts"
         ) || "[]"
     );
+
+let storedVibeChatVersion =
+    localStorage.getItem("vibechat_data_version");
+
+if(storedVibeChatVersion !== VIBECHAT_DATA_VERSION){
+    localStorage.removeItem("vibechat_chats");
+    localStorage.removeItem("vibechat_message_cache");
+    localStorage.setItem("vibechat_data_version", VIBECHAT_DATA_VERSION);
+}
 
 let chats =
     JSON.parse(
@@ -1691,6 +1703,9 @@ let globalSource = null;
 
 let messageIds = new Set();
 let directorySeen = new Set();
+
+let chatMessages = JSON.parse(localStorage.getItem("vibechat_message_cache") || "{}");
+let historyLoading = new Set();
 
 let directoryHeartbeatTimer = null;
 let presenceHeartbeatTimer = null;
@@ -1788,6 +1803,14 @@ function isOwner(){
 
 
 function updateOwnerUI(){
+
+    const createButton =
+        document.querySelector(".create-chat");
+
+    if(createButton){
+        createButton.style.display =
+            isOwner() ? "block" : "none";
+    }
 
     const sidebarBadge =
         document.getElementById(
@@ -2151,6 +2174,10 @@ function logout(){
     myUsername = "";
 
     localStorage.removeItem(
+        "vibechat_message_cache"
+    );
+
+    localStorage.removeItem(
         "vibechat_username"
     );
 
@@ -2361,6 +2388,11 @@ function renderChats(){
    ========================================= */
 
 function openCreateChat(){
+
+    if(!isOwner()){
+        showToast("👑 Only the owner can create chats");
+        return;
+    }
 
     document
         .getElementById(
@@ -2584,6 +2616,11 @@ function toggleEveryone(){
 
 async function createChat(){
 
+    if(!isOwner()){
+        showToast("👑 Only the owner can create chats");
+        return;
+    }
+
     const name =
         document
             .getElementById(
@@ -2783,41 +2820,14 @@ function connectToChat(){
     }
 
 
-    messageIds.clear();
-
-
-    messagesContainer.innerHTML = `
-
-        <div
-            id="empty"
-            class="empty"
-        >
-
-            <div class="empty-icon">
-                ⏳
-            </div>
-
-            <div class="empty-title">
-                Connecting...
-            </div>
-
-            <div>
-                Joining ${escapeHTML(
-                    currentChat.name
-                )}
-            </div>
-
-        </div>
-
-    `;
-
+    renderCachedChatMessages(currentChat);
 
     const url =
         "https://ntfy.sh/" +
         encodeURIComponent(
             currentChat.topic
         ) +
-        "/sse?stream=1";
+        "/sse?since=all";
 
 
     eventSource =
@@ -2959,12 +2969,88 @@ function connectToChat(){
    ADD MESSAGE
    ========================================= */
 
+function saveMessageCache(){
+    try{
+        localStorage.setItem("vibechat_message_cache",JSON.stringify(chatMessages));
+    }catch(error){
+        console.log("Message cache save failed:",error);
+    }
+}
+
+function messageObject(username,text,timestamp,id){
+    return {username:username || "Anonymous",text:text || "",timestamp:timestamp || Date.now(),id:String(id)};
+}
+
+function storeChatMessage(chatId,username,text,timestamp,id){
+    if(!chatId) return;
+    if(!Array.isArray(chatMessages[chatId])) chatMessages[chatId]=[];
+    if(chatMessages[chatId].some(item=>String(item.id)===String(id))) return;
+    chatMessages[chatId].push(messageObject(username,text,timestamp,id));
+    chatMessages[chatId].sort((a,b)=>a.timestamp-b.timestamp);
+    if(chatMessages[chatId].length>5000) chatMessages[chatId]=chatMessages[chatId].slice(-5000);
+    saveMessageCache();
+}
+
+function renderCachedChatMessages(chat){
+    messagesContainer.innerHTML="";
+    messageIds.clear();
+    const messages=chatMessages[chat.id] || [];
+    if(!messages.length){
+        messagesContainer.innerHTML=`<div id="empty" class="empty"><div class="empty-icon">💬</div><div class="empty-title">No messages yet</div><div>Start the conversation!</div></div>`;
+        return;
+    }
+    messages.forEach(message=>addMessage(message.username,message.text,message.timestamp,message.username===myUsername,message.id,false));
+    messagesContainer.scrollTop=messagesContainer.scrollHeight;
+}
+
+async function loadChatHistory(chat){
+    if(!chat || !chat.topic || historyLoading.has(chat.id)) return;
+    historyLoading.add(chat.id);
+    try{
+        const response=await fetch("https://ntfy.sh/"+encodeURIComponent(chat.topic)+"/json?poll=1&since=all",{cache:"no-store"});
+        if(!response.ok) throw new Error("Chat history request failed");
+        const loaded=[];
+        const text=await response.text();
+        for(const line of text.split("\n")){
+            if(!line.trim()) continue;
+            try{
+                const data=JSON.parse(line);
+                if(data.event!=="message") continue;
+                const raw=data.message || "";
+                const separator=raw.indexOf("|");
+                if(separator===-1) continue;
+                const username=raw.substring(0,separator);
+                const messageText=raw.substring(separator+1);
+                const timestamp=data.time ? data.time*1000 : Date.now();
+                const id=String(data.id || (data.time+"-"+username+"-"+messageText));
+                loaded.push(messageObject(username,messageText,timestamp,id));
+            }catch(error){console.log("History line error:",error);}
+        }
+        const unique=new Map();
+        const existing=Array.isArray(chatMessages[chat.id]) ? chatMessages[chat.id] : [];
+        [...existing,...loaded].forEach(message=>unique.set(String(message.id),message));
+        chatMessages[chat.id]=Array.from(unique.values()).sort((a,b)=>a.timestamp-b.timestamp).slice(-5000);
+        saveMessageCache();
+        if(currentChat && currentChat.id===chat.id) renderCachedChatMessages(chat);
+    }catch(error){
+        console.log("Could not preload chat history:",chat.name,error);
+    }finally{
+        historyLoading.delete(chat.id);
+    }
+}
+
+function preloadAllChatHistories(){
+    const sharedChats=chats.filter(chat=>chat.shared===true && chat.topic);
+    sharedChats.forEach(chat=>loadChatHistory(chat));
+}
+
 function addMessage(
     username,
     text,
     timestamp,
     mine,
-    id
+    id,
+    saveToCache = true
 ){
 
     if(
@@ -2979,6 +3065,10 @@ function addMessage(
     messageIds.add(
         id
     );
+
+    if(saveToCache && currentChat){
+        storeChatMessage(currentChat.id,username,text,timestamp,id);
+    }
 
 
     const oldEmpty =
@@ -4079,6 +4169,7 @@ function performLocalReset(
     messageIds.clear();
 
     directorySeen.clear();
+    chatMessages = {};
 
 
     localStorage.removeItem(
@@ -4524,9 +4615,18 @@ function showBrowserNotification(
 
 async function startVibeChat(){
 
+    if(eventSource){
+        eventSource.close();
+        eventSource = null;
+    }
+
+    if(globalSource){
+        globalSource.close();
+        globalSource = null;
+    }
+
     updateProfile();
 
-    // Load the existing directory cache first, then keep the live stream open.
     await loadAllExistingChats();
     connectGlobalStreams();
 
