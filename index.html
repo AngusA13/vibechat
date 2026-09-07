@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeChat 3.0</title>
+<title>VibeChat 4.0</title>
 
 <style>
 * {
@@ -184,24 +184,6 @@ button {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.share-button {
-    border: 1px solid #3b4560;
-    background: #202638;
-    color: white;
-    border-radius: 9px;
-    padding: 10px 15px;
-    font-weight: bold;
-}
-
-.share-button:hover {
-    background: #2b344b;
-}
-
-.share-button.shared {
-    background: #245d3d;
-    border-color: #31865a;
 }
 
 /* MESSAGES */
@@ -587,16 +569,6 @@ input:focus {
         max-width: 88%;
     }
 
-    .share-button {
-        padding: 9px;
-        font-size: 0;
-    }
-
-    .share-button::before {
-        content: "📢";
-        font-size: 17px;
-    }
-
     .emoji-panel {
         right: 12px;
         bottom: 78px;
@@ -613,7 +585,7 @@ input:focus {
 
         <div class="logo">
             Vibe<span>Chat</span>
-            <span class="version">3.0</span>
+            <span class="version">4.0</span>
         </div>
 
         <div class="rooms-title">
@@ -648,27 +620,14 @@ input:focus {
                 </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:14px;">
+            <div class="profile">
 
-                <button
-                    id="shareButton"
-                    class="share-button"
-                    onclick="shareCurrentChat()"
-                    style="display:none;"
-                >
-                    📢 Share
-                </button>
+                <div id="profileAvatar" class="avatar">
+                    ?
+                </div>
 
-                <div class="profile">
-
-                    <div id="profileAvatar" class="avatar">
-                        ?
-                    </div>
-
-                    <div id="profileName" class="profile-name">
-                        Anonymous
-                    </div>
-
+                <div id="profileName" class="profile-name">
+                    Anonymous
                 </div>
 
             </div>
@@ -765,12 +724,14 @@ input:focus {
         >
 
         <div class="modal-buttons">
+
             <button
                 class="primary-button"
                 onclick="saveFirstName()"
             >
                 Continue
             </button>
+
         </div>
 
     </div>
@@ -788,6 +749,8 @@ input:focus {
 
         <p>
             Give your chat a name, then choose who it is for.
+            Once you create it, it automatically becomes visible
+            to the people you selected.
         </p>
 
         <input
@@ -826,7 +789,7 @@ input:focus {
 <script>
 
 /* =========================================
-   VIBECHAT 3.0
+   VIBECHAT 4.0
    ========================================= */
 
 const PRESENCE_TOPIC =
@@ -834,6 +797,12 @@ const PRESENCE_TOPIC =
 
 const CHAT_DIRECTORY_TOPIC =
     "vibechat-7f4k2m9x-chat-directory";
+
+const DIRECTORY_HEARTBEAT =
+    15000;
+
+const PRESENCE_HEARTBEAT =
+    15000;
 
 let chats =
     JSON.parse(
@@ -851,6 +820,15 @@ let presenceSource = null;
 let directorySource = null;
 
 let messageIds = new Set();
+
+let directorySeen =
+    new Set();
+
+let directoryHeartbeatTimer =
+    null;
+
+let presenceHeartbeatTimer =
+    null;
 
 let myUsername =
     localStorage.getItem("vibechat_username") || "";
@@ -887,12 +865,6 @@ const toast =
 
 const roomsContainer =
     document.getElementById("rooms");
-
-const noChats =
-    document.getElementById("noChats");
-
-const shareButton =
-    document.getElementById("shareButton");
 
 
 /* =========================================
@@ -1031,8 +1003,9 @@ function renderChats() {
 
         room.innerHTML = `
             <span class="room-icon">
-                ${chat.shared ? "🌎" : "💬"}
+                ${chat.everyone ? "🌎" : "💬"}
             </span>
+
             <span>
                 ${escapeHTML(chat.name)}
             </span>
@@ -1066,9 +1039,11 @@ function openCreateChat() {
 
     setTimeout(
         () => {
+
             document
                 .getElementById("chatNameInput")
                 .focus();
+
         },
         50
     );
@@ -1096,6 +1071,7 @@ function renderUserList() {
 
     list.innerHTML = "";
 
+
     const everyone =
         document.createElement("label");
 
@@ -1108,14 +1084,23 @@ function renderUserList() {
             id="everyoneCheck"
             onchange="toggleEveryone()"
         >
-        <span class="user-avatar-small">🌎</span>
-        <strong>Everyone</strong>
+
+        <span class="user-avatar-small">
+            🌎
+        </span>
+
+        <strong>
+            Everyone
+        </strong>
     `;
 
-    list.appendChild(everyone);
+    list.appendChild(
+        everyone
+    );
 
 
     const uniqueUsers = [];
+
 
     users.forEach(name => {
 
@@ -1124,7 +1109,9 @@ function renderUserList() {
             !uniqueUsers.includes(name)
         ) {
 
-            uniqueUsers.push(name);
+            uniqueUsers.push(
+                name
+            );
 
         }
 
@@ -1133,76 +1120,110 @@ function renderUserList() {
 
     if (
         myUsername &&
-        !uniqueUsers.includes(myUsername)
+        !uniqueUsers.includes(
+            myUsername
+        )
     ) {
 
-        uniqueUsers.push(myUsername);
+        uniqueUsers.push(
+            myUsername
+        );
 
     }
 
 
     uniqueUsers
-        .sort((a,b) =>
-            a.localeCompare(b)
+        .sort(
+            (a,b) =>
+                a.localeCompare(b)
         )
-        .forEach(name => {
+        .forEach(
+            name => {
 
-            const label =
-                document.createElement("label");
+                const label =
+                    document.createElement(
+                        "label"
+                    );
 
-            label.className =
-                "user-option";
+                label.className =
+                    "user-option";
 
-            const safeName =
-                escapeHTML(name);
 
-            label.innerHTML = `
-                <input
-                    type="checkbox"
-                    class="user-check"
-                    value="${safeName}"
-                >
+                const safeName =
+                    escapeHTML(name);
 
-                <span class="user-avatar-small">
-                    ${escapeHTML(
-                        name.charAt(0).toUpperCase()
-                    )}
-                </span>
 
-                <span>
-                    ${safeName}
-                    ${
-                        name === myUsername
-                            ? " (you)"
-                            : ""
-                    }
-                </span>
-            `;
+                label.innerHTML = `
+                    <input
+                        type="checkbox"
+                        class="user-check"
+                        value="${safeName}"
+                    >
 
-            list.appendChild(label);
+                    <span class="user-avatar-small">
+                        ${escapeHTML(
+                            name
+                                .charAt(0)
+                                .toUpperCase()
+                        )}
+                    </span>
 
-        });
+                    <span>
+                        ${safeName}
+
+                        ${
+                            name === myUsername
+                                ? " (you)"
+                                : ""
+                        }
+                    </span>
+                `;
+
+
+                list.appendChild(
+                    label
+                );
+
+            }
+        );
 
 }
 
 
+/* =========================================
+   EVERYONE TOGGLE
+   ========================================= */
+
 function toggleEveryone() {
 
     const everyone =
-        document.getElementById("everyoneCheck");
+        document.getElementById(
+            "everyoneCheck"
+        );
+
 
     document
-        .querySelectorAll(".user-check")
-        .forEach(check => {
+        .querySelectorAll(
+            ".user-check"
+        )
+        .forEach(
+            check => {
 
-            check.disabled =
-                everyone.checked;
+                check.disabled =
+                    everyone.checked;
 
-            if (everyone.checked) {
-                check.checked = false;
+
+                if (
+                    everyone.checked
+                ) {
+
+                    check.checked =
+                        false;
+
+                }
+
             }
-
-        });
+        );
 
 }
 
@@ -1211,13 +1232,16 @@ function toggleEveryone() {
    CREATE CHAT
    ========================================= */
 
-function createChat() {
+async function createChat() {
 
     const name =
         document
-            .getElementById("chatNameInput")
+            .getElementById(
+                "chatNameInput"
+            )
             .value
             .trim();
+
 
     if (!name) {
 
@@ -1231,9 +1255,11 @@ function createChat() {
 
 
     const everyone =
-        document.getElementById(
-            "everyoneCheck"
-        ).checked;
+        document
+            .getElementById(
+                "everyoneCheck"
+            )
+            .checked;
 
 
     const selectedUsers =
@@ -1241,24 +1267,44 @@ function createChat() {
             document.querySelectorAll(
                 ".user-check:checked"
             )
-        ).map(
-            check => check.value
+        )
+        .map(
+            check =>
+                check.value
         );
+
+
+    if (
+        !everyone &&
+        selectedUsers.length === 0
+    ) {
+
+        showToast(
+            "Choose who the chat is for"
+        );
+
+        return;
+
+    }
 
 
     const chat = {
 
-        id: randomId(),
+        id:
+            randomId(),
 
-        name: name,
+        name:
+            name,
 
         topic:
             "vibechat-7f4k2m9x-" +
             randomId(20),
 
-        shared: false,
+        shared:
+            true,
 
-        everyone: everyone,
+        everyone:
+            everyone,
 
         users:
             everyone
@@ -1274,7 +1320,10 @@ function createChat() {
     };
 
 
-    chats.push(chat);
+    chats.push(
+        chat
+    );
+
 
     saveChats();
 
@@ -1282,11 +1331,41 @@ function createChat() {
 
     renderChats();
 
-    switchChat(chat.id);
-
-    showToast(
-        "✓ Chat created"
+    switchChat(
+        chat.id
     );
+
+
+    /*
+       IMPORTANT:
+
+       The chat is automatically
+       published here.
+
+       There is NO separate
+       Share button anymore.
+    */
+
+    await publishChatDirectory(
+        chat
+    );
+
+
+    if (everyone) {
+
+        showToast(
+            "🌎 Chat is now visible to Everyone!"
+        );
+
+    }
+
+    else {
+
+        showToast(
+            "✓ Chat created and shared"
+        );
+
+    }
 
 }
 
@@ -1299,8 +1378,10 @@ function switchChat(id) {
 
     const chat =
         chats.find(
-            item => item.id === id
+            item =>
+                item.id === id
         );
+
 
     if (!chat) {
         return;
@@ -1315,23 +1396,8 @@ function switchChat(id) {
 
 
     roomName.textContent =
-        "💬 " + chat.name;
-
-
-    shareButton.style.display =
-        "block";
-
-
-    shareButton.classList.toggle(
-        "shared",
-        chat.shared
-    );
-
-
-    shareButton.textContent =
-        chat.shared
-            ? "🌎 Shared"
-            : "📢 Share";
+        "💬 " +
+        chat.name;
 
 
     connectToChat();
@@ -1349,7 +1415,8 @@ function connectToChat() {
 
         eventSource.close();
 
-        eventSource = null;
+        eventSource =
+            null;
 
     }
 
@@ -1358,6 +1425,7 @@ function connectToChat() {
 
         connectionStatus.textContent =
             "Not connected";
+
 
         messagesContainer.innerHTML = `
             <div class="empty">
@@ -1372,11 +1440,9 @@ function connectToChat() {
 
     messageIds.clear();
 
+
     messagesContainer.innerHTML = `
-        <div
-            id="empty"
-            class="empty"
-        >
+        <div id="empty" class="empty">
             Connecting to ${escapeHTML(
                 currentChat.name
             )}...
@@ -1393,7 +1459,9 @@ function connectToChat() {
 
 
     eventSource =
-        new EventSource(url);
+        new EventSource(
+            url
+        );
 
 
     eventSource.onopen =
@@ -1436,7 +1504,8 @@ function connectToChat() {
 
 
                 const raw =
-                    data.message || "";
+                    data.message ||
+                    "";
 
 
                 const separator =
@@ -1546,7 +1615,9 @@ function addMessage(
     }
 
 
-    messageIds.add(id);
+    messageIds.add(
+        id
+    );
 
 
     const oldEmpty =
@@ -1556,12 +1627,16 @@ function addMessage(
 
 
     if (oldEmpty) {
+
         oldEmpty.remove();
+
     }
 
 
     const bubble =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     bubble.className =
@@ -1704,7 +1779,10 @@ chatForm.addEventListener(
 
         catch(error) {
 
-            console.error(error);
+            console.error(
+                error
+            );
+
 
             showToast(
                 "❌ Couldn't send message"
@@ -1717,123 +1795,164 @@ chatForm.addEventListener(
 
 
 /* =========================================
-   SHARE CHAT
+   AUTOMATIC CHAT SHARING
    ========================================= */
 
-async function shareCurrentChat() {
+async function publishChatDirectory(
+    chat
+) {
 
-    if (!currentChat) {
+    if (
+        !chat ||
+        !chat.shared
+    ) {
+
         return;
-    }
 
-
-    currentChat.shared =
-        true;
-
-
-    saveChats();
-
-    renderChats();
-
-
-    const shareUrl =
-        window.location.origin +
-        window.location.pathname +
-        "?chat=" +
-        encodeURIComponent(
-            currentChat.id
-        ) +
-        "&name=" +
-        encodeURIComponent(
-            currentChat.name
-        ) +
-        "&topic=" +
-        encodeURIComponent(
-            currentChat.topic
-        );
-
-
-    try {
-
-        await navigator.clipboard.writeText(
-            shareUrl
-        );
-
-        showToast(
-            "🌎 Chat shared — link copied"
-        );
-
-    }
-
-    catch(error) {
-
-        prompt(
-            "Copy this VibeChat chat link:",
-            shareUrl
-        );
-
-    }
-
-
-    publishChatDirectory();
-
-}
-
-
-/* =========================================
-   CHAT DIRECTORY
-   ========================================= */
-
-function publishChatDirectory() {
-
-    if (!currentChat) {
-        return;
     }
 
 
     const payload =
         JSON.stringify({
 
-            type: "chat",
+            type:
+                "chat",
+
+            version:
+                4,
 
             id:
-                currentChat.id,
+                chat.id,
 
             name:
-                currentChat.name,
+                chat.name,
 
             topic:
-                currentChat.topic,
+                chat.topic,
+
+            shared:
+                true,
 
             everyone:
-                currentChat.everyone,
+                chat.everyone === true,
 
             users:
-                currentChat.users,
+                Array.isArray(
+                    chat.users
+                )
+                    ? chat.users
+                    : [],
 
             createdBy:
-                currentChat.createdBy
+                chat.createdBy,
+
+            createdAt:
+                chat.createdAt,
+
+            announcementId:
+                randomId(12),
+
+            announcedAt:
+                Date.now()
 
         });
 
 
-    fetch(
-        "https://ntfy.sh/" +
-        encodeURIComponent(
-            CHAT_DIRECTORY_TOPIC
-        ),
-        {
-            method: "POST",
-            body: payload
+    try {
+
+        const response =
+            await fetch(
+                "https://ntfy.sh/" +
+                encodeURIComponent(
+                    CHAT_DIRECTORY_TOPIC
+                ),
+                {
+                    method: "POST",
+                    body: payload
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Directory publish failed"
+            );
+
         }
-    )
-    .catch(
-        error =>
-            console.log(
-                "Directory update failed",
-                error
-            )
+
+    }
+
+    catch(error) {
+
+        console.log(
+            "Directory update failed:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   PUBLISH ALL SHARED CHATS
+   ========================================= */
+
+async function publishAllSharedChats() {
+
+    const sharedChats =
+        chats.filter(
+            chat =>
+                chat.shared === true
+        );
+
+
+    for (
+        const chat of sharedChats
+    ) {
+
+        await publishChatDirectory(
+            chat
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   DIRECTORY HEARTBEAT
+   ========================================= */
+
+function startDirectoryHeartbeat() {
+
+    clearInterval(
+        directoryHeartbeatTimer
     );
+
+
+    /*
+       Re-announces shared chats
+       every 15 seconds.
+
+       This means someone who opens
+       VibeChat while the creator is
+       online can discover the chat.
+    */
+
+    directoryHeartbeatTimer =
+        setInterval(
+            function() {
+
+                publishAllSharedChats();
+
+            },
+            DIRECTORY_HEARTBEAT
+        );
+
+
+    publishAllSharedChats();
 
 }
 
@@ -1842,42 +1961,86 @@ function publishChatDirectory() {
    PRESENCE
    ========================================= */
 
-function announcePresence() {
+async function announcePresence() {
 
     if (!myUsername) {
         return;
     }
 
 
-    fetch(
-        "https://ntfy.sh/" +
-        encodeURIComponent(
-            PRESENCE_TOPIC
-        ),
-        {
-            method: "POST",
-            body:
-                JSON.stringify({
-                    type: "user",
-                    name: myUsername
-                })
-        }
-    )
-    .catch(
-        error =>
-            console.log(
-                "Presence failed",
-                error
-            )
-    );
+    try {
+
+        await fetch(
+            "https://ntfy.sh/" +
+            encodeURIComponent(
+                PRESENCE_TOPIC
+            ),
+            {
+                method: "POST",
+                body:
+                    JSON.stringify({
+
+                        type:
+                            "user",
+
+                        name:
+                            myUsername,
+
+                        announcedAt:
+                            Date.now()
+
+                    })
+            }
+        );
+
+    }
+
+    catch(error) {
+
+        console.log(
+            "Presence failed:",
+            error
+        );
+
+    }
 
 }
 
 
+/* =========================================
+   PRESENCE HEARTBEAT
+   ========================================= */
+
+function startPresenceHeartbeat() {
+
+    clearInterval(
+        presenceHeartbeatTimer
+    );
+
+
+    presenceHeartbeatTimer =
+        setInterval(
+            function() {
+
+                announcePresence();
+
+            },
+            PRESENCE_HEARTBEAT
+        );
+
+}
+
+
+/* =========================================
+   CONNECT PRESENCE
+   ========================================= */
+
 function connectPresence() {
 
     if (presenceSource) {
+
         presenceSource.close();
+
     }
 
 
@@ -1906,7 +2069,9 @@ function connectPresence() {
                     data.event !==
                     "message"
                 ) {
+
                     return;
+
                 }
 
 
@@ -1920,7 +2085,9 @@ function connectPresence() {
                     user.type !==
                     "user"
                 ) {
+
                     return;
+
                 }
 
 
@@ -1944,7 +2111,8 @@ function connectPresence() {
             catch(error) {
 
                 console.log(
-                    "Presence message error"
+                    "Presence message error:",
+                    error
                 );
 
             }
@@ -1955,13 +2123,15 @@ function connectPresence() {
 
 
 /* =========================================
-   CHAT DIRECTORY CONNECTION
+   CONNECT CHAT DIRECTORY
    ========================================= */
 
 function connectDirectory() {
 
     if (directorySource) {
+
         directorySource.close();
+
     }
 
 
@@ -1973,6 +2143,26 @@ function connectDirectory() {
             ) +
             "/sse"
         );
+
+
+    directorySource.onopen =
+        function() {
+
+            console.log(
+                "Connected to VibeChat directory"
+            );
+
+        };
+
+
+    directorySource.onerror =
+        function() {
+
+            console.log(
+                "Directory reconnecting..."
+            );
+
+        };
 
 
     directorySource.onmessage =
@@ -1990,7 +2180,9 @@ function connectDirectory() {
                     data.event !==
                     "message"
                 ) {
+
                     return;
+
                 }
 
 
@@ -2004,187 +2196,193 @@ function connectDirectory() {
                     chat.type !==
                     "chat"
                 ) {
+
                     return;
+
                 }
 
 
+                if (
+                    !chat.id ||
+                    !chat.topic ||
+                    !chat.name
+                ) {
+
+                    return;
+
+                }
+
+
+                const everyone =
+                    chat.everyone ===
+                    true;
+
+
+                const chatUsers =
+                    Array.isArray(
+                        chat.users
+                    )
+                        ? chat.users
+                        : [];
+
+
                 const allowed =
-                    chat.everyone ||
-                    (
-                        Array.isArray(
-                            chat.users
-                        ) &&
-                        chat.users.includes(
-                            myUsername
-                        )
+                    everyone ||
+                    chatUsers.includes(
+                        myUsername
                     );
 
 
                 if (!allowed) {
+
                     return;
+
                 }
 
 
-                const exists =
-                    chats.some(
+                /*
+                   Prevent the same directory
+                   announcement from being
+                   processed twice.
+                */
+
+                const announcementId =
+                    chat.announcementId ||
+                    (
+                        chat.id +
+                        "-" +
+                        chat.announcedAt
+                    );
+
+
+                if (
+                    directorySeen.has(
+                        announcementId
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                directorySeen.add(
+                    announcementId
+                );
+
+
+                /*
+                   If the chat already exists,
+                   update it instead of adding
+                   a duplicate.
+                */
+
+                const existing =
+                    chats.find(
                         item =>
                             item.id ===
                             chat.id
                     );
 
 
-                if (!exists) {
+                if (existing) {
 
-                    chats.push({
+                    existing.name =
+                        chat.name;
 
-                        id:
-                            chat.id,
+                    existing.topic =
+                        chat.topic;
 
-                        name:
-                            chat.name,
+                    existing.shared =
+                        true;
 
-                        topic:
-                            chat.topic,
+                    existing.everyone =
+                        everyone;
 
-                        shared:
-                            true,
+                    existing.users =
+                        chatUsers;
 
-                        everyone:
-                            chat.everyone,
-
-                        users:
-                            chat.users || [],
-
-                        createdBy:
-                            chat.createdBy,
-
-                        createdAt:
-                            Date.now()
-
-                    });
-
+                    existing.createdBy =
+                        chat.createdBy ||
+                        existing.createdBy;
 
                     saveChats();
 
                     renderChats();
 
-
-                    showToast(
-                        "🌎 New chat: " +
-                        chat.name
-                    );
+                    return;
 
                 }
+
+
+                /*
+                   NEW CHAT FOUND!
+
+                   Add it automatically to
+                   this user's sidebar.
+                */
+
+                const joinedChat = {
+
+                    id:
+                        chat.id,
+
+                    name:
+                        chat.name,
+
+                    topic:
+                        chat.topic,
+
+                    shared:
+                        true,
+
+                    everyone:
+                        everyone,
+
+                    users:
+                        chatUsers,
+
+                    createdBy:
+                        chat.createdBy ||
+                        "VibeChat user",
+
+                    createdAt:
+                        chat.createdAt ||
+                        Date.now()
+
+                };
+
+
+                chats.push(
+                    joinedChat
+                );
+
+
+                saveChats();
+
+                renderChats();
+
+
+                showToast(
+                    everyone
+                        ? "🌎 New chat for Everyone: " +
+                          chat.name
+                        : "💬 New chat for you: " +
+                          chat.name
+                );
 
             }
 
             catch(error) {
 
                 console.log(
-                    "Directory message error"
+                    "Directory message error:",
+                    error
                 );
 
             }
 
         };
-
-}
-
-
-/* =========================================
-   LOAD CHAT FROM SHARED URL
-   ========================================= */
-
-function loadSharedChat() {
-
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-
-    const id =
-        params.get("chat");
-
-
-    const name =
-        params.get("name");
-
-
-    const topic =
-        params.get("topic");
-
-
-    if (
-        !id ||
-        !topic
-    ) {
-
-        return;
-
-    }
-
-
-    const existing =
-        chats.find(
-            chat =>
-                chat.id === id
-        );
-
-
-    if (existing) {
-
-        switchChat(
-            existing.id
-        );
-
-        return;
-
-    }
-
-
-    const joinedChat = {
-
-        id: id,
-
-        name:
-            name ||
-            "Shared Chat",
-
-        topic: topic,
-
-        shared: true,
-
-        everyone: true,
-
-        users: [],
-
-        createdBy:
-            "VibeChat user",
-
-        createdAt:
-            Date.now()
-
-    };
-
-
-    chats.push(
-        joinedChat
-    );
-
-
-    saveChats();
-
-    renderChats();
-
-    switchChat(
-        joinedChat.id
-    );
-
-
-    showToast(
-        "🌎 Joined chat"
-    );
 
 }
 
@@ -2389,7 +2587,9 @@ async function requestNotifications() {
 
         catch(error) {
 
-            console.log(error);
+            console.log(
+                error
+            );
 
         }
 
@@ -2406,7 +2606,9 @@ function showBrowserNotification(
     if (
         !("Notification" in window)
     ) {
+
         return;
+
     }
 
 
@@ -2414,7 +2616,9 @@ function showBrowserNotification(
         Notification.permission !==
         "granted"
     ) {
+
         return;
+
     }
 
 
@@ -2422,15 +2626,21 @@ function showBrowserNotification(
         document.visibilityState ===
         "visible"
     ) {
+
         return;
+
     }
 
 
     new Notification(
-        "VibeChat — " + username,
+        "VibeChat — " +
+        username,
         {
-            body: text,
-            tag: "vibechat-message"
+            body:
+                text,
+
+            tag:
+                "vibechat-message"
         }
     );
 
@@ -2441,18 +2651,7 @@ function showBrowserNotification(
    FIRST TIME NAME
    ========================================= */
 
-function checkFirstTime() {
-
-    if (!myUsername) {
-
-        document
-            .getElementById("nameModal")
-            .classList.add("show");
-
-        return;
-
-    }
-
+function startVibeChat() {
 
     updateProfile();
 
@@ -2462,7 +2661,31 @@ function checkFirstTime() {
 
     connectDirectory();
 
-    loadSharedChat();
+    startPresenceHeartbeat();
+
+    startDirectoryHeartbeat();
+
+}
+
+
+function checkFirstTime() {
+
+    if (!myUsername) {
+
+        document
+            .getElementById(
+                "nameModal"
+            )
+            .classList.add(
+                "show"
+            );
+
+        return;
+
+    }
+
+
+    startVibeChat();
 
 }
 
@@ -2503,19 +2726,15 @@ function saveFirstName() {
 
 
     document
-        .getElementById("nameModal")
-        .classList.remove("show");
+        .getElementById(
+            "nameModal"
+        )
+        .classList.remove(
+            "show"
+        );
 
 
-    updateProfile();
-
-    announcePresence();
-
-    connectPresence();
-
-    connectDirectory();
-
-    loadSharedChat();
+    startVibeChat();
 
 
     showToast(
