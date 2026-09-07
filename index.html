@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeChat 6.0</title>
+<title>VibeChat 6.1</title>
 
 <style>
 *{box-sizing:border-box}
@@ -947,6 +947,31 @@ input:focus{
 }
 
 
+.room-delete{
+    margin-left:auto;
+    width:28px;
+    height:28px;
+    border:1px solid rgba(255,79,104,.2);
+    border-radius:8px;
+    background:rgba(255,60,80,.08);
+    color:#ff6579;
+    cursor:pointer;
+    font-size:13px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.owner-mode .room-delete{
+    display:flex;
+}
+
+.room-delete:hover{
+    background:rgba(255,60,80,.18);
+}
+
+
 /* MOBILE */
 
 @media(max-width:700px){
@@ -1157,7 +1182,7 @@ input:focus{
         <div class="logo">
             Vibe<span>Chat</span>
             <span class="version">
-                6.0
+                6.1
             </span>
         </div>
 
@@ -1486,25 +1511,25 @@ input:focus{
             </div>
 
             <div class="owner-section-text">
-                This removes local accounts and chats
-                on this device and broadcasts a reset
-                command to connected VibeChat clients.
+                You can delete individual chats or wipe all
+                VibeChat accounts and chats. Wipe broadcasts
+                a reset command to connected VibeChat clients.
             </div>
 
             <button
                 class="owner-clear"
                 onclick="confirmGlobalReset()"
             >
-                🗑 Reset All Users & Chats
+                🗑 Wipe All Users & Chats
             </button>
 
         </div>
 
 
         <div class="owner-warning">
-            Global reset cannot remove data from a
-            device that is offline. When that device
-            reconnects, its local data will remain.
+            ⚠️ Wipe/delete broadcasts only reach connected
+            clients. An offline device can still have its
+            old local data until it opens VibeChat.
         </div>
 
 
@@ -1550,6 +1575,9 @@ const CHAT_DIRECTORY_TOPIC =
 
 const RESET_TOPIC =
     "vibechat-7f4k2m9x-global-reset";
+
+const CHAT_DELETE_TOPIC =
+    "vibechat-7f4k2m9x-chat-delete";
 
 const DIRECTORY_HEARTBEAT =
     15000;
@@ -2142,6 +2170,11 @@ function renderChats(){
                     currentChat.id === chat.id
                         ? " active"
                         : ""
+                ) +
+                (
+                    isOwner()
+                        ? " owner-mode"
+                        : ""
                 );
 
 
@@ -2164,6 +2197,12 @@ function renderChats(){
                 ${
                     chat.shared
                         ? '<span class="shared-dot"></span>'
+                        : ''
+                }
+
+                ${
+                    isOwner()
+                        ? `<button class="room-delete" title="Delete chat" onclick="event.stopPropagation(); deleteChat('${chat.id}')">🗑</button>`
                         : ''
                 }
 
@@ -3483,6 +3522,41 @@ function connectDirectory(){
 
 
 /* =========================================
+   CHAT DELETE CONNECTION
+   ========================================= */
+
+function connectChatDeleteListener(){
+
+    if(window.chatDeleteSource){
+        window.chatDeleteSource.close();
+    }
+
+    window.chatDeleteSource = new EventSource(
+        "https://ntfy.sh/" +
+        encodeURIComponent(CHAT_DELETE_TOPIC) +
+        "/sse"
+    );
+
+    window.chatDeleteSource.onmessage = function(event){
+        try{
+            const data = JSON.parse(event.data);
+            if(data.event !== "message") return;
+
+            const deletion = JSON.parse(data.message);
+            if(deletion.type !== "chat-delete") return;
+            if(!deletion.chatId || deletion.by === myUsername) return;
+
+            removeLocalChat(deletion.chatId);
+            showToast("🗑 A chat was deleted by the owner");
+        }
+        catch(error){
+            console.log("Chat delete message error:", error);
+        }
+    };
+}
+
+
+/* =========================================
    GLOBAL RESET CONNECTION
    ========================================= */
 
@@ -3663,6 +3737,15 @@ function performLocalReset(
     }
 
 
+    if(window.chatDeleteSource){
+
+        window.chatDeleteSource.close();
+
+        window.chatDeleteSource = null;
+
+    }
+
+
     chats = [];
 
     users = [];
@@ -3784,6 +3867,76 @@ function closeOwnerPanel(){
             "show"
         );
 
+}
+
+
+/* =========================================
+   OWNER CHAT DELETE
+   ========================================= */
+
+async function deleteChat(id){
+
+    if(!isOwner()){
+        showToast("⛔ Owner access required");
+        return;
+    }
+
+    const chat = chats.find(item => item.id === id);
+    if(!chat) return;
+
+    if(!confirm(`Delete the chat "${chat.name}" for connected VibeChat users?`)){
+        return;
+    }
+
+    try{
+        await fetch(
+            "https://ntfy.sh/" + encodeURIComponent(CHAT_DELETE_TOPIC),
+            {
+                method:"POST",
+                body:JSON.stringify({
+                    type:"chat-delete",
+                    chatId:chat.id,
+                    by:myUsername,
+                    deleteId:randomId(16),
+                    time:Date.now()
+                })
+            }
+        );
+    }
+    catch(error){
+        console.log("Chat delete broadcast failed:", error);
+    }
+
+    removeLocalChat(chat.id);
+    showToast("🗑 Chat deleted");
+}
+
+function removeLocalChat(id){
+
+    chats = chats.filter(chat => chat.id !== id);
+
+    if(currentChat && currentChat.id === id){
+        if(eventSource){
+            eventSource.close();
+            eventSource = null;
+        }
+
+        currentChat = null;
+        roomName.textContent = "Welcome to VibeChat";
+        document.getElementById("chatHeadingIcon").textContent = "💬";
+        connectionStatus.textContent = "Not connected";
+
+        messagesContainer.innerHTML = `
+            <div id="empty" class="empty">
+                <div class="empty-icon">💬</div>
+                <div class="empty-title">No chat selected</div>
+                <div>Select a chat to start talking.</div>
+            </div>
+        `;
+    }
+
+    saveChats();
+    renderChats();
 }
 
 
@@ -4055,6 +4208,8 @@ function startVibeChat(){
 
     connectDirectory();
 
+    connectChatDeleteListener();
+
     connectResetListener();
 
     startPresenceHeartbeat();
@@ -4236,4 +4391,5 @@ startup();
 
 </body>
 </html>
+
 ```
