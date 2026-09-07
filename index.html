@@ -1,10 +1,10 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeChat 6.1</title>
+<title>VibeChat 6.2</title>
 
 <style>
 *{box-sizing:border-box}
@@ -207,6 +207,7 @@ button:active{
 /* SIDEBAR */
 
 .sidebar{
+    position:relative;
     width:285px;
     background:
         linear-gradient(180deg,rgba(15,19,34,.98),rgba(7,10,19,.98));
@@ -382,6 +383,64 @@ button:active{
     justify-content:center;
     font-weight:900;
     background:linear-gradient(135deg,#4264ff,#7355ef);
+}
+
+.user-card-avatar{
+    cursor:pointer;
+    transition:.2s;
+}
+
+.user-card-avatar:hover{
+    transform:scale(1.06);
+    box-shadow:0 0 18px rgba(80,100,255,.35);
+}
+
+.profile-menu{
+    position:absolute;
+    left:10px;
+    bottom:70px;
+    width:190px;
+    padding:8px;
+    border-radius:14px;
+    background:rgba(18,22,38,.98);
+    border:1px solid var(--border);
+    box-shadow:0 14px 35px rgba(0,0,0,.4);
+    display:none;
+    z-index:50;
+}
+
+.profile-menu.show{
+    display:block;
+}
+
+.profile-menu-title{
+    padding:8px 10px 7px;
+    color:#8d98b3;
+    font-size:10px;
+    font-weight:800;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.profile-menu-button{
+    width:100%;
+    border:0;
+    border-radius:10px;
+    padding:10px;
+    background:rgba(255,255,255,.05);
+    color:white;
+    font-weight:800;
+    cursor:pointer;
+    text-align:left;
+}
+
+.profile-menu-button:hover{
+    background:rgba(255,255,255,.1);
+}
+
+.profile-menu-button.logout-button{
+    color:#ff8d8d;
 }
 
 .user-card-info{
@@ -1182,7 +1241,7 @@ input:focus{
         <div class="logo">
             Vibe<span>Chat</span>
             <span class="version">
-                6.1
+                6.2
             </span>
         </div>
 
@@ -1218,6 +1277,10 @@ input:focus{
             <div
                 id="sidebarAvatar"
                 class="user-card-avatar"
+                onclick="toggleProfileMenu(event)"
+                title="Account menu"
+                role="button"
+                tabindex="0"
             >
                 ?
             </div>
@@ -1245,6 +1308,13 @@ input:focus{
                 👑
             </div>
 
+        </div>
+
+        <div id="profileMenu" class="profile-menu">
+            <div id="profileMenuTitle" class="profile-menu-title">Account</div>
+            <button class="profile-menu-button logout-button" onclick="logout()">
+                🚪 Log out
+            </button>
         </div>
 
     </aside>
@@ -2008,10 +2078,64 @@ function loginUser(
 
 
 /* =========================================
+   PROFILE MENU
+   ========================================= */
+
+function toggleProfileMenu(event){
+
+    if(event){
+        event.stopPropagation();
+    }
+
+    const menu =
+        document.getElementById(
+            "profileMenu"
+        );
+
+    const title =
+        document.getElementById(
+            "profileMenuTitle"
+        );
+
+    title.textContent =
+        myUsername || "Account";
+
+    menu.classList.toggle(
+        "show"
+    );
+}
+
+
+document.addEventListener(
+    "click",
+    function(event){
+
+        const menu =
+            document.getElementById(
+                "profileMenu"
+            );
+
+        if(
+            !menu.contains(event.target) &&
+            !event.target.closest("#sidebarAvatar")
+        ){
+            menu.classList.remove(
+                "show"
+            );
+        }
+    }
+);
+
+
+/* =========================================
    LOGOUT
    ========================================= */
 
 function logout(){
+
+    document
+        .getElementById("profileMenu")
+        .classList.remove("show");
 
     if(eventSource){
         eventSource.close();
