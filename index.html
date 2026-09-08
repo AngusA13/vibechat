@@ -3,128 +3,2691 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>VibeChat 8.5 — Online</title>
+<title>VibeChat 8.8 — Online</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f2f2f7;color:#111827;height:100vh;overflow:hidden}button,input,select{font:inherit}button{cursor:pointer;border:0}.hidden{display:none!important}
-#auth{height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.card{width:min(430px,100%);background:white;padding:28px;border-radius:24px;box-shadow:0 10px 40px #0001}.logo{text-align:center;font-size:42px;font-weight:800}.logo b{color:#007aff}.sub{text-align:center;color:#6b7280;margin:5px 0 24px}.tabs{display:flex;background:#eef0f4;padding:4px;border-radius:12px}.tabs button{flex:1;padding:10px;border-radius:9px;background:transparent;color:#6b7280}.tabs .active{background:white;color:#111827;font-weight:700;box-shadow:0 1px 4px #0001}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input,.field select{width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;outline:0}.field input:focus{border-color:#007aff;box-shadow:0 0 0 3px #007aff18}.primary{width:100%;padding:13px;background:#007aff;color:#fff;border-radius:12px;font-weight:700}.owner{width:100%;padding:12px;background:#111827;color:#fff;border-radius:12px;font-weight:700;margin-top:9px}.msg{padding:10px;border-radius:10px;font-size:13px;margin:10px 0}.err{background:#fff0ef;color:#b42318}.ok{background:#ecfff0;color:#16753a}.note{text-align:center;color:#6b7280;font-size:12px;line-height:1.4;margin-top:13px}
-#app{height:100vh;display:none}.side{width:300px;background:#fff;border-right:1px solid #e5e7eb;display:flex;flex-direction:column}.sidehead{padding:17px;border-bottom:1px solid #e5e7eb}.sidehead h1{margin:0;font-size:24px}.me{display:flex;gap:10px;align-items:center;background:#f4f5f7;padding:10px;border-radius:13px;margin-top:10px}.avatar{width:38px;height:38px;border-radius:50%;background:#007aff;color:white;display:flex;align-items:center;justify-content:center;font-weight:800}.meinfo{min-width:0}.mename{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.role{font-size:12px;color:#6b7280}.actions{padding:10px 15px;display:flex;gap:7px}.actions button{background:#eef0f4;padding:8px 10px;border-radius:10px}.chats{overflow:auto;flex:1;padding:5px 10px}.chat{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;margin:2px 0}.chat:hover{background:#f4f5f7}.chat.active{background:#eaf3ff}.icon{width:38px;height:38px;border-radius:11px;background:#e9edf3;display:flex;align-items:center;justify-content:center}.chatinfo{min-width:0;flex:1}.chatname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.preview{font-size:12px;color:#6b7280}.del{background:transparent;color:#aaa;padding:5px}.del:hover{color:#ff3b30}.main{flex:1;min-width:0;display:flex;flex-direction:column}.head{height:65px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:0 17px;gap:12px}.menu{display:none;background:#eef0f4;border-radius:10px;padding:8px}.headname{font-size:18px;font-weight:800}.status{font-size:12px;color:#34a853}.messages{flex:1;overflow:auto;padding:18px}.empty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:#6b7280}.row{display:flex;margin:6px 0}.row.mine{justify-content:flex-end}.wrap{max-width:min(72%,620px)}.sender{font-size:11px;color:#6b7280;margin:0 8px 3px}.mine .sender{text-align:right}.bubble{background:white;border:1px solid #e5e7eb;padding:10px 13px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere}.mine .bubble{background:#007aff;color:white;border-color:#007aff;border-bottom-right-radius:5px}.row:not(.mine) .bubble{border-bottom-left-radius:5px}.time{font-size:10px;color:#9ca3af;margin:3px 7px}.mine .time{text-align:right}.composer{background:white;border-top:1px solid #e5e7eb;padding:10px;display:flex;gap:8px}.composer input{flex:1;border:1px solid #e5e7eb;background:#f7f7f9;border-radius:22px;padding:11px 15px;outline:0}.composer button{width:43px;height:43px;border-radius:50%;background:#007aff;color:white}.composer .emoji{background:#eef0f4;color:#222}
-.back{position:fixed;inset:0;background:#0006;display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}.modal{background:white;width:min(560px,100%);max-height:90vh;overflow:auto;border-radius:20px;padding:20px}.modalhead{display:flex;justify-content:space-between;align-items:center}.modal h2{margin:0 0 12px}.close{width:34px;height:34px;border-radius:50%;background:#eef0f4}.users{border:1px solid #e5e7eb;border-radius:12px;max-height:200px;overflow:auto;padding:5px}.user{display:flex;gap:8px;padding:8px}.modalbuttons{display:flex;gap:8px;margin-top:14px}.modalbuttons button{flex:1;padding:11px;border-radius:11px}.cancel{background:#eef0f4}.danger{background:#ff3b30;color:white}.box{background:#f6f7f9;padding:14px;border-radius:14px;margin-top:12px}.box h3{margin:0 0 7px}.box p{font-size:13px;color:#6b7280;margin:5px 0}.box button{padding:10px;border-radius:10px;background:white;border:1px solid #e5e7eb;margin:5px 5px 0 0}#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;background:#111827;color:white;padding:10px 15px;border-radius:12px;transition:.2s;z-index:100;font-size:13px}#toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:700px){.side{position:fixed;z-index:30;top:0;bottom:0;left:-310px;transition:.2s;box-shadow:10px 0 30px #0002}.side.open{left:0}.menu{display:block}.wrap{max-width:86%}}
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+background:#0b1020;
+color:#fff;
+}
+
+button,input,select{font:inherit}
+button{cursor:pointer}
+
+#auth{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:
+radial-gradient(circle at top,#263c78 0,#111a38 35%,#080c18 75%);
+}
+
+.card{
+width:100%;
+max-width:430px;
+background:rgba(18,25,48,.96);
+border:1px solid #34416b;
+border-radius:22px;
+padding:28px;
+box-shadow:0 20px 70px rgba(0,0,0,.45);
+}
+
+.logo{
+text-align:center;
+font-size:34px;
+font-weight:800;
+margin-bottom:6px;
+}
+
+.subtitle{
+text-align:center;
+color:#9ca9ca;
+margin-bottom:24px;
+}
+
+.tabs{
+display:flex;
+gap:8px;
+margin-bottom:18px;
+}
+
+.tabs button{
+flex:1;
+border:0;
+border-radius:12px;
+padding:11px;
+background:#202a4a;
+color:#b9c4e0;
+}
+
+.tabs button.active{
+background:#586cff;
+color:white;
+}
+
+.field{margin-bottom:14px}
+
+.field label{
+display:block;
+font-size:13px;
+color:#aab5d2;
+margin-bottom:6px;
+}
+
+.field input,
+.field select{
+width:100%;
+padding:13px 14px;
+border-radius:12px;
+border:1px solid #3a466c;
+outline:none;
+background:#0d1429;
+color:#fff;
+}
+
+.field input:focus,
+.field select:focus{
+border-color:#6b7cff;
+}
+
+.primary{
+width:100%;
+border:0;
+border-radius:12px;
+padding:13px;
+font-weight:700;
+color:white;
+background:#586cff;
+}
+
+.error{
+display:none;
+background:#4b1d2b;
+color:#ffb8c7;
+border:1px solid #77354a;
+padding:10px;
+border-radius:10px;
+margin-bottom:12px;
+font-size:14px;
+}
+
+#app{
+display:none;
+height:100vh;
+overflow:hidden;
+}
+
+.app{
+display:flex;
+height:100%;
+}
+
+.sidebar{
+width:290px;
+background:#11182e;
+border-right:1px solid #293452;
+display:flex;
+flex-direction:column;
+}
+
+.sidebarTop{
+padding:18px;
+border-bottom:1px solid #293452;
+}
+
+.brand{
+font-size:23px;
+font-weight:800;
+}
+
+.userInfo{
+margin-top:8px;
+color:#9eabc8;
+font-size:13px;
+}
+
+.ownerBadge{
+display:inline-block;
+margin-top:7px;
+padding:4px 8px;
+border-radius:999px;
+background:#5a3a82;
+color:#e6d4ff;
+font-size:11px;
+font-weight:700;
+}
+
+.chatHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 16px 8px;
+color:#8f9cbb;
+font-size:13px;
+}
+
+.smallBtn{
+border:0;
+background:#202b4c;
+color:#dce3f7;
+padding:6px 9px;
+border-radius:8px;
+}
+
+.smallBtn.disabled{
+opacity:.35;
+cursor:not-allowed;
+}
+
+.chatList{
+overflow:auto;
+flex:1;
+padding:8px;
+}
+
+.chatItem{
+padding:12px;
+border-radius:12px;
+margin-bottom:5px;
+cursor:pointer;
+}
+
+.chatItem:hover{
+background:#1b2543;
+}
+
+.chatItem.active{
+background:#2c3b70;
+}
+
+.chatName{
+font-weight:700;
+}
+
+.chatType{
+color:#8997b8;
+font-size:11px;
+margin-top:3px;
+}
+
+.sidebarBottom{
+padding:12px;
+border-top:1px solid #293452;
+}
+
+.logout{
+width:100%;
+padding:10px;
+border:0;
+border-radius:10px;
+background:#242d48;
+color:#fff;
+}
+
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+min-width:0;
+}
+
+.topbar{
+height:66px;
+padding:0 18px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#11182e;
+border-bottom:1px solid #293452;
+}
+
+.currentChat{
+font-size:19px;
+font-weight:800;
+}
+
+.mobileMenu{
+display:none;
+border:0;
+background:#242e4d;
+color:white;
+border-radius:9px;
+padding:8px 11px;
+}
+
+.messages{
+flex:1;
+overflow-y:auto;
+padding:20px;
+}
+
+.message{
+max-width:720px;
+margin-bottom:15px;
+}
+
+.message.me{
+margin-left:auto;
+}
+
+.messageBubble{
+display:inline-block;
+background:#18213b;
+border:1px solid #2b385b;
+border-radius:14px;
+padding:10px 13px;
+white-space:pre-wrap;
+word-break:break-word;
+}
+
+.message.me .messageBubble{
+background:#3445a0;
+border-color:#4357c5;
+}
+
+.messageMeta{
+color:#7f8dab;
+font-size:11px;
+margin-bottom:4px;
+}
+
+.composer{
+display:flex;
+gap:9px;
+padding:14px;
+border-top:1px solid #293452;
+background:#11182e;
+}
+
+.composer input{
+flex:1;
+min-width:0;
+background:#0c1327;
+border:1px solid #354263;
+color:#fff;
+border-radius:12px;
+padding:12px;
+outline:none;
+}
+
+.send{
+border:0;
+background:#586cff;
+color:white;
+padding:0 19px;
+border-radius:12px;
+font-weight:700;
+}
+
+.empty{
+color:#7785a5;
+text-align:center;
+margin-top:50px;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.65);
+align-items:center;
+justify-content:center;
+padding:20px;
+z-index:20;
+}
+
+.modalBox{
+width:100%;
+max-width:470px;
+background:#151e37;
+border:1px solid #344263;
+border-radius:18px;
+padding:22px;
+}
+
+.modalTitle{
+font-size:21px;
+font-weight:800;
+margin-bottom:17px;
+}
+
+.modalActions{
+display:flex;
+gap:8px;
+margin-top:15px;
+}
+
+.modalActions button{
+flex:1;
+padding:11px;
+border:0;
+border-radius:10px;
+}
+
+.cancel{
+background:#28324e;
+color:white;
+}
+
+.confirm{
+background:#586cff;
+color:white;
+}
+
+.danger{
+background:#a7354c;
+color:white;
+}
+
+.ownerPanel{
+border-top:1px solid #293452;
+padding:12px;
+}
+
+.ownerPanel button{
+width:100%;
+margin-top:7px;
+padding:9px;
+border:0;
+border-radius:9px;
+background:#442b57;
+color:#fff;
+}
+
+@media(max-width:700px){
+
+.sidebar{
+position:fixed;
+left:-300px;
+top:0;
+bottom:0;
+z-index:10;
+transition:.2s;
+}
+
+.sidebar.open{
+left:0;
+}
+
+.mobileMenu{
+display:block;
+}
+
+.topbar{
+gap:10px;
+}
+
+}
 </style>
 </head>
+
 <body>
-<section id="auth">
+
+<!-- LOGIN / CREATE ACCOUNT -->
+
+<div id="auth">
+
 <div class="card">
-<div class="logo">Vibe<b>Chat</b></div><div class="sub">Chat with your friends online</div>
-<div class="tabs"><button id="lt" class="active" onclick="tab('login')">Log in</button><button id="st" onclick="tab('signup')">Create account</button></div>
-<div id="ae" class="msg err hidden"></div><div id="as" class="msg ok hidden"></div>
-<div class="field"><label>Username</label><input id="username" autocomplete="username" placeholder="Enter username"></div>
-<div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter password"></div>
-<button id="authbtn" class="primary" onclick="submitAuth()">Log in</button>
-<div class="note">VibeChat 8.5<br>Owner access is unlocked automatically when the exact owner credentials are entered.</div>
-</div></section>
 
-<section id="app">
-<aside id="side" class="side"><div class="sidehead"><h1>VibeChat</h1><div class="me"><div id="avatar" class="avatar">V</div><div class="meinfo"><div id="mename" class="mename">User</div><div id="role" class="role">Online</div></div></div></div>
-<div class="actions"><button onclick="openCreate()">＋ Chat</button><button id="ownerPanel" class="hidden" onclick="openOwner()">👑 Owner</button><button onclick="logout()">Log out</button></div><div id="chatlist" class="chats"></div></aside>
-<main class="main"><header class="head"><button class="menu" onclick="toggleSide()">☰</button><div><div id="headname" class="headname">Main Chat</div><div id="status" class="status">Connecting…</div></div></header><div id="messages" class="messages"><div class="empty">Loading Main Chat…</div></div><div class="composer"><button class="emoji" onclick="emoji()">😊</button><input id="message" maxlength="2000" placeholder="Message…" onkeydown="messageKey(event)"><button onclick="sendMessage()">➤</button></div></main></section>
+<div class="logo">💬 VibeChat</div>
 
-<div id="createModal" class="back hidden"><div class="modal"><div class="modalhead"><h2>Create chat</h2><button class="close" onclick="closeModal('createModal')">×</button></div><div id="ce" class="msg err hidden"></div><div class="field"><label>Chat name</label><input id="chatname" placeholder="e.g. Gaming"></div><div class="field"><label>Who can join?</label><select id="visibility" onchange="toggleUsers()"><option value="everyone">Everyone</option><option value="selected">Selected users</option></select></div><div id="userbox" class="field hidden"><label>Select users</label><div id="users" class="users">Loading…</div></div><div class="modalbuttons"><button class="cancel" onclick="closeModal('createModal')">Cancel</button><button class="primary" onclick="createChat()">Create chat</button></div></div></div>
+<div class="subtitle">
+Chat with your friends
+</div>
 
-<div id="ownerModal" class="back hidden"><div class="modal"><div class="modalhead"><h2>👑 Owner Panel</h2><button class="close" onclick="closeModal('ownerModal')">×</button></div><div class="box"><h3>Owner account</h3><p>Local owner credentials + Supabase anonymous database identity.</p><p id="ownerstatus">Checking…</p></div><div class="box"><h3>Chat management</h3><p>Only the owner can create/delete chats and wipe chat data.</p><button onclick="loadChats()">🔄 Refresh chats</button><button class="danger" onclick="wipeChats()">🗑️ Wipe chats/messages</button></div><div class="box"><h3>Database status</h3><p id="dbstatus">Checking…</p></div></div></div>
-<div id="toast"></div>
+<div class="tabs">
+
+<button
+id="loginTab"
+class="active"
+onclick="showAuth('login')">
+Login
+</button>
+
+<button
+id="signupTab"
+onclick="showAuth('signup')">
+Create Account
+</button>
+
+</div>
+
+<div id="authError" class="error"></div>
+
+<div class="field">
+
+<label>Username</label>
+
+<input
+id="username"
+autocomplete="username"
+placeholder="Username">
+
+</div>
+
+<div class="field">
+
+<label>Password</label>
+
+<input
+id="password"
+type="password"
+autocomplete="current-password"
+placeholder="Password">
+
+</div>
+
+<button
+id="authButton"
+class="primary"
+onclick="submitAuth()">
+Login
+</button>
+
+</div>
+
+</div>
+
+
+<!-- MAIN APP -->
+
+<div id="app">
+
+<div class="app">
+
+<aside id="sidebar" class="sidebar">
+
+<div class="sidebarTop">
+
+<div class="brand">
+💬 VibeChat
+</div>
+
+<div id="userInfo" class="userInfo"></div>
+
+<div
+id="ownerBadge"
+class="ownerBadge"
+style="display:none">
+👑 OWNER
+</div>
+
+</div>
+
+
+<div class="chatHeader">
+
+<span>CHATS</span>
+
+<!-- ONLY OWNER CAN CREATE CHATS -->
+
+<button
+id="newChatButton"
+class="smallBtn"
+onclick="openCreateChat()"
+title="Create chat">
+＋
+</button>
+
+</div>
+
+
+<div id="chatList" class="chatList"></div>
+
+
+<div
+id="ownerPanel"
+class="ownerPanel"
+style="display:none">
+
+<div style="font-size:12px;color:#aab5d2">
+OWNER PANEL
+</div>
+
+<button onclick="wipeAllMessages()">
+🗑️ Clear all messages
+</button>
+
+<button onclick="deleteAllChats()">
+💥 Delete all custom chats
+</button>
+
+</div>
+
+
+<div class="sidebarBottom">
+
+<button
+class="logout"
+onclick="logout()">
+Log out
+</button>
+
+</div>
+
+</aside>
+
+
+<main class="main">
+
+<div class="topbar">
+
+<button
+class="mobileMenu"
+onclick="toggleSidebar()">
+☰
+</button>
+
+<div
+id="currentChat"
+class="currentChat">
+Main Chat
+</div>
+
+<div></div>
+
+</div>
+
+
+<div
+id="messages"
+class="messages">
+
+<div class="empty">
+Loading messages...
+</div>
+
+</div>
+
+
+<form
+class="composer"
+onsubmit="sendMessage(event)">
+
+<input
+id="messageInput"
+autocomplete="off"
+placeholder="Type a message...">
+
+<button class="send">
+Send
+</button>
+
+</form>
+
+</main>
+
+</div>
+
+</div>
+
+
+<!-- CREATE CHAT MODAL -->
+
+<div id="createModal" class="modal">
+
+<div class="modalBox">
+
+<div class="modalTitle">
+Create Chat
+</div>
+
+<div class="field">
+
+<label>Chat name</label>
+
+<input
+id="chatName"
+placeholder="Example: Gaming">
+
+</div>
+
+<div class="field">
+
+<label>Visibility</label>
+
+<select id="chatVisibility">
+
+<option value="everyone">
+Everyone
+</option>
+
+<option value="private">
+Private
+</option>
+
+</select>
+
+</div>
+
+<div class="modalActions">
+
+<button
+class="cancel"
+onclick="closeCreateChat()">
+Cancel
+</button>
+
+<button
+class="confirm"
+onclick="createChat()">
+Create
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- DELETE CHAT MODAL -->
+
+<div id="deleteModal" class="modal">
+
+<div class="modalBox">
+
+<div class="modalTitle">
+Delete Chat?
+</div>
+
+<div style="color:#aab5c9">
+This will delete the chat and its messages.
+</div>
+
+<div class="modalActions">
+
+<button
+class="cancel"
+onclick="closeDelete()">
+Cancel
+</button>
+
+<button
+class="danger"
+onclick="confirmDeleteChat()">
+Delete
+</button>
+
+</div>
+
+</div>
+
+</div>
+
 
 <script>
-const SUPABASE_URL="https://lorkancqficghomqwybb.supabase.co";
-const SUPABASE_KEY="sb_publishable_cT_xqZqesLJ9lRl1t8dzDA_GTSyR8XB";
-const OWNER_USERNAME="Angusthe67man";
-const OWNER_PASSWORD="VibeChatAdmin2026!";
-const OWNER_KEY="vibechat_local_owner_session";
-const MAIN_ID="00000000-0000-4000-8000-000000000001";
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let user=null,profile=null,chats=[],current=null,channel=null,ownerMode=false,authMode="login";
-const $=id=>document.getElementById(id);
-function tab(m){authMode=m;$('lt').classList.toggle('active',m==='login');$('st').classList.toggle('active',m==='signup');$('authbtn').textContent=m==='login'?'Log in':'Create account';clearMsgs()}
-function clearMsgs(){$('ae').classList.add('hidden');$('as').classList.add('hidden');$('ae').textContent='';$('as').textContent=''}
-function error(x){$('ae').textContent=x;$('ae').classList.remove('hidden');$('as').classList.add('hidden')}
-function success(x){$('as').textContent=x;$('as').classList.remove('hidden');$('ae').classList.add('hidden')}
-function toast(x){$('toast').textContent=x;$('toast').classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>$('toast').classList.remove('show'),2500)}
-function emailFor(u){return u.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')+'@vibechat.local'}
-function friendly(e){let m=String(e?.message||e||'Unknown error');let l=m.toLowerCase();if(l.includes('rate limit'))return'Supabase rate limit reached. Try again later.';if(l.includes('row-level security')||l.includes('rls'))return'Supabase blocked this action with Row Level Security (RLS).';if(l.includes('invalid login credentials'))return'Username or password is incorrect.';return m}
-async function submitAuth(){
-clearMsgs();
-let u=$('username').value.trim(),p=$('password').value;
-if(!u||!p)return error('Enter a username and password.');
-$('authbtn').disabled=true;
-try{
-if(authMode==='login' && u===OWNER_USERNAME && p===OWNER_PASSWORD){
-  let s=(await sb.auth.getSession()).data.session;
-  if(s && !s.user.is_anonymous) await sb.auth.signOut();
-  s=(await sb.auth.getSession()).data.session;
-  if(!s || !s.user.is_anonymous){
-    let r=await sb.auth.signInAnonymously();
-    if(r.error)throw r.error;
-    s=r.data.session;
-  }
-  if(!s?.user)throw new Error('Supabase did not return an anonymous user.');
-  ownerMode=true;
-  user=s.user;
-  profile={id:user.id,username:OWNER_USERNAME,is_owner:true};
-  localStorage.setItem(OWNER_KEY,'true');
-  await showApp();
-  toast('👑 Owner account unlocked');
-  return;
-}
-if(authMode==='signup'){
-  if(u===OWNER_USERNAME)return error('That username is reserved.');
-  let r=await sb.auth.signUp({email:emailFor(u),password:p});
-  if(r.error)throw r.error;
-  if(!r.data.session)return success('Account created. If email confirmation is enabled, confirm it first, then log in.');
-  user=r.data.user;
-  await finishUser(u);
-}else{
-  let r=await sb.auth.signInWithPassword({email:emailFor(u),password:p});
-  if(r.error)throw r.error;
-  user=r.data.user;
-  await finishUser(u);
-}
-}catch(e){
-  let m=String(e?.message||e);
-  if(authMode==='login' && u===OWNER_USERNAME && p===OWNER_PASSWORD && m.toLowerCase().includes('anonymous')){
-    error('Enable Anonymous Sign-Ins in your Supabase Auth settings, then try again.');
-  }else{
-    error(friendly(e));
-  }
-}finally{
-  $('authbtn').disabled=false;
-  $('authbtn').textContent=authMode==='login'?'Log in':'Create account';
-}}
 
-async function finishUser(username){ownerMode=false;let r=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(r.error)console.warn(r.error);profile=r.data;if(!profile){let c=await sb.from('profiles').insert({id:user.id,username,is_owner:false}).select().single();if(c.error)throw c.error;profile=c.data}localStorage.removeItem(OWNER_KEY);await showApp()}
-async function showApp(){$('auth').style.display='none';$('app').style.display='flex';$('mename').textContent=profile?.username||'User';$('avatar').textContent=(profile?.username||'V').charAt(0).toUpperCase();$('role').textContent=isOwner()?'👑 Owner • Online':'Online';$('ownerPanel').classList.toggle('hidden',!isOwner());await ensureMain();await loadChats();let main=chats.find(c=>c.id===MAIN_ID)||chats[0];if(main)await switchChat(main.id);$('status').textContent='● Online'}
-function isOwner(){return ownerMode||!!profile?.is_owner}
-async function ensureMain(){let r=await sb.from('chats').select('id').eq('id',MAIN_ID).maybeSingle();if(r.error){console.warn(r.error);return}if(!r.data){let x=await sb.from('chats').insert({id:MAIN_ID,name:'Main Chat',created_by:user.id,is_main:true,visibility:'everyone'});if(x.error)console.warn(x.error)}}
-async function loadChats(){let r=await sb.from('chats').select('*').order('created_at',{ascending:true});if(r.error){console.warn(r.error);toast('Could not load all chats. Check Supabase RLS.')}chats=r.data||[];if(!chats.some(c=>c.id===MAIN_ID))chats.unshift({id:MAIN_ID,name:'Main Chat',is_main:true,visibility:'everyone',virtual:true,created_at:new Date(0).toISOString()});chats.sort((a,b)=>a.id===MAIN_ID?-1:b.id===MAIN_ID?1:new Date(a.created_at||0)-new Date(b.created_at||0));renderChats()}
-function renderChats(){let box=$('chatlist');box.innerHTML='';for(let c of chats){let d=document.createElement('div');d.className='chat'+(current?.id===c.id?' active':'');d.innerHTML='<div class="icon">'+(c.id===MAIN_ID?'💬':'🗨️')+'</div><div class="chatinfo"><div class="chatname"></div><div class="preview">'+(c.id===MAIN_ID?'Everyone':c.visibility==='everyone'?'Everyone':'Selected users')+'</div></div>'+(isOwner()&&c.id!==MAIN_ID&&!c.virtual?'<button class="del">🗑️</button>':'');d.querySelector('.chatname').textContent=c.name||'Chat';d.onclick=e=>{if(e.target.closest('.del'))return;switchChat(c.id);if(innerWidth<=700)toggleSide(false)};let del=d.querySelector('.del');if(del)del.onclick=e=>{e.stopPropagation();deleteChat(c.id)};box.appendChild(d)}}
-async function switchChat(id){let c=chats.find(x=>x.id===id);if(!c)return;current=c;$('headname').textContent=c.name||'Chat';renderChats();await loadMessages(id);subscribe(id)}
-async function loadMessages(id){$('messages').innerHTML='<div class="empty">Loading messages…</div>';let r=await sb.from('messages').select('*').eq('chat_id',id).order('created_at',{ascending:true});if(r.error){console.error(r.error);$('messages').innerHTML='<div class="empty">Could not load messages.<br><br>Check your Supabase RLS policies.</div>';return}let rows=r.data||[];if(!rows.length)return $('messages').innerHTML='<div class="empty">No messages yet.<br>Start the conversation!</div>';renderMessages(rows)}
-function renderMessages(rows){let box=$('messages');box.innerHTML='';for(let m of rows)addMessageElement(m,false);box.scrollTop=box.scrollHeight}
-function addMessageElement(m,scroll=true){let mine=m.user_id===user?.id,row=document.createElement('div');row.className='row'+(mine?' mine':'');let w=document.createElement('div');w.className='wrap';let s=document.createElement('div');s.className='sender';s.textContent=mine?'You':(m.username||'User');let b=document.createElement('div');b.className='bubble';b.textContent=m.content||'';let t=document.createElement('div');t.className='time';t.textContent=m.created_at?new Date(m.created_at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'';w.append(s,b,t);row.appendChild(w);$('messages').appendChild(row);if(scroll)$('messages').scrollTop=$('messages').scrollHeight}
-async function sendMessage(){let input=$('message'),text=input.value.trim();if(!text||!current||!user)return;input.disabled=true;try{let r=await sb.from('messages').insert({chat_id:current.id,user_id:user.id,content:text,username:profile?.username||'User'});if(r.error)throw r.error;input.value=''}catch(e){toast('Message failed: '+friendly(e))}finally{input.disabled=false;input.focus()}}
-function messageKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}function emoji(){$('message').value+='😊';$('message').focus()}
-function subscribe(id){if(channel)sb.removeChannel(channel);channel=sb.channel('vibechat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'chat_id=eq.'+id},p=>{if(current?.id===id){if(p.new.user_id!==user?.id||!Array.from(document.querySelectorAll('.bubble')).some(x=>x.textContent===p.new.content))addMessageElement(p.new)}}).subscribe(s=>{$('status').textContent=s==='SUBSCRIBED'?'● Online':'● '+s})}
-async function openCreate(){if(!isOwner())return toast('Only the owner can create chats.');$('chatname').value='';$('ce').classList.add('hidden');$('createModal').classList.remove('hidden');await loadUsers()}
-async function loadUsers(){let box=$('users'),r=await sb.from('profiles').select('id,username').order('username');if(r.error)return box.textContent='Could not load users.';box.innerHTML='';for(let x of(r.data||[])){if(x.id===user.id)continue;let l=document.createElement('label');l.className='user';l.innerHTML='<input type="checkbox" value="'+x.id+'">';let sp=document.createElement('span');sp.textContent=x.username||'User';l.appendChild(sp);box.appendChild(l)}if(!box.children.length)box.textContent='No other users yet.'}
-function toggleUsers(){$('userbox').classList.toggle('hidden',$('visibility').value!=='selected')}
-async function createChat(){if(!isOwner())return;let name=$('chatname').value.trim(),vis=$('visibility').value;if(!name){$('ce').textContent='Enter a chat name.';$('ce').classList.remove('hidden');return}try{let r=await sb.from('chats').insert({name,created_by:user.id,is_main:false,visibility:vis}).select().single();if(r.error)throw r.error;if(vis==='selected'){let ids=[...document.querySelectorAll('#users input:checked')].map(x=>x.value);if(ids.length){let m=await sb.from('chat_members').insert(ids.map(id=>({chat_id:r.data.id,user_id:id})));if(m.error)throw m.error}}closeModal('createModal');await loadChats();await switchChat(r.data.id);toast('Chat created!')}catch(e){$('ce').textContent='Could not create chat: '+friendly(e);$('ce').classList.remove('hidden')}}
-async function deleteChat(id){if(!isOwner()||id===MAIN_ID)return;if(!confirm('Delete this chat and its messages?'))return;try{let a=await sb.from('messages').delete().eq('chat_id',id);if(a.error)throw a.error;await sb.from('chat_members').delete().eq('chat_id',id);let c=await sb.from('chats').delete().eq('id',id);if(c.error)throw c.error;await loadChats();await switchChat(MAIN_ID);toast('Chat deleted.')}catch(e){toast('Delete failed: '+friendly(e))}}
-async function wipeChats(){if(!isOwner())return;if(!confirm('Wipe ALL messages and delete ALL extra chats? Main Chat stays.'))return;if(!confirm('This cannot be undone. Continue?'))return;try{let m=await sb.from('messages').delete().neq('id','__never__');if(m.error)throw m.error;let r=await sb.from('chats').select('id').neq('id',MAIN_ID);if(r.error)throw r.error;let ids=(r.data||[]).map(x=>x.id);if(ids.length){await sb.from('chat_members').delete().in('chat_id',ids);let c=await sb.from('chats').delete().in('id',ids);if(c.error)throw c.error}await loadChats();await switchChat(MAIN_ID);$('dbstatus').textContent='Wipe completed.';toast('🗑️ Chats/messages wiped.')}catch(e){$('dbstatus').textContent='Wipe failed: '+friendly(e);toast('Wipe failed: '+friendly(e))}}
-async function openOwner(){if(!isOwner())return;$('ownerModal').classList.remove('hidden');let s=(await sb.auth.getSession()).data.session;$('ownerstatus').textContent=s?.user?.is_anonymous?'Supabase anonymous identity connected ✓':'Supabase anonymous identity missing';let r=await sb.from('chats').select('id').limit(1);$('dbstatus').textContent=r.error?'Database blocked: '+friendly(r.error):'Database connection working ✓'}
-function closeModal(id){$(id).classList.add('hidden')}function toggleSide(force){$('side').classList.toggle('open',typeof force==='boolean'?force:undefined)}
-async function logout(){if(channel)await sb.removeChannel(channel);try{await sb.auth.signOut()}catch(e){}localStorage.removeItem(OWNER_KEY);user=null;profile=null;ownerMode=false;current=null;chats=[];$('app').style.display='none';$('auth').style.display='flex';$('password').value='';clearMsgs()}
-async function restore(){try{if(localStorage.getItem(OWNER_KEY)==='true'){let s=(await sb.auth.getSession()).data.session;if(s?.user?.is_anonymous){ownerMode=true;user=s.user;profile={id:user.id,username:OWNER_USERNAME,is_owner:true};await showApp();return true}localStorage.removeItem(OWNER_KEY)}let s=(await sb.auth.getSession()).data.session;if(s?.user&&!s.user.is_anonymous){user=s.user;let r=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(r.data){profile=r.data;await showApp();return true}}}catch(e){console.warn(e)}return false}
-sb.auth.onAuthStateChange(async(e,s)=>{if(ownerMode)return;if(s?.user&&!s.user.is_anonymous&&!user){user=s.user;let r=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(r.data){profile=r.data;await showApp()}}});restore();
-document.addEventListener('click',e=>{if(e.target.classList.contains('back'))e.target.classList.add('hidden')});
+/* ==============================
+   VIBECHAT SETTINGS
+============================== */
+
+const SUPABASE_URL=
+"https://lorkancqficghomqwybb.supabase.co";
+
+const SUPABASE_KEY=
+"sb_publishable_cT_xqZqesLJ9lRl1t8dzDA_GTSyR8XB";
+
+const OWNER_USERNAME=
+"Angusthe67man";
+
+const OWNER_PASSWORD=
+"VibeChatAdmin2026!";
+
+const MAIN_ID=
+"00000000-0000-4000-8000-000000000001";
+
+const ACCOUNT_KEY=
+"vibechat_accounts";
+
+const SESSION_KEY=
+"vibechat_session";
+
+const sb=
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+let authMode="login";
+let user=null;
+let profile=null;
+let ownerMode=false;
+let chats=[];
+let current=null;
+let channel=null;
+let deleteTarget=null;
+
+
+/* ==============================
+   AUTH SCREEN
+============================== */
+
+function showAuth(mode){
+
+authMode=mode;
+
+document
+.getElementById("loginTab")
+.classList.toggle(
+"active",
+mode==="login"
+);
+
+document
+.getElementById("signupTab")
+.classList.toggle(
+"active",
+mode==="signup"
+);
+
+document
+.getElementById("authButton")
+.textContent=
+mode==="login"
+?"Login"
+:"Create Account";
+
+document
+.getElementById("authError")
+.style.display="none";
+
+}
+
+
+function authError(message){
+
+const box=
+document.getElementById("authError");
+
+box.textContent=message;
+
+box.style.display="block";
+
+}
+
+
+/* ==============================
+   LOCAL ACCOUNTS
+============================== */
+
+function getAccounts(){
+
+try{
+
+return JSON.parse(
+localStorage.getItem(
+ACCOUNT_KEY
+)||"[]"
+);
+
+}catch{
+
+return [];
+
+}
+
+}
+
+
+function saveAccounts(accounts){
+
+localStorage.setItem(
+ACCOUNT_KEY,
+JSON.stringify(accounts)
+);
+
+}
+
+
+function makeId(){
+
+if(crypto.randomUUID){
+return crypto.randomUUID();
+}
+
+return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+.replace(
+/[xy]/g,
+c=>{
+
+const r=
+Math.random()*16|0;
+
+const v=
+c==="x"
+?r
+:(r&3|8);
+
+return v.toString(16);
+
+}
+);
+
+}
+
+
+async function hashPassword(password){
+
+const data=
+new TextEncoder()
+.encode(password);
+
+const hash=
+await crypto.subtle.digest(
+"SHA-256",
+data
+);
+
+return Array.from(
+new Uint8Array(hash)
+)
+.map(
+b=>b.toString(16).padStart(2,"0")
+)
+.join("");
+
+}
+
+
+/* ==============================
+   LOGIN / CREATE ACCOUNT
+============================== */
+
+async function submitAuth(){
+
+const username=
+document
+.getElementById("username")
+.value
+.trim();
+
+const password=
+document
+.getElementById("password")
+.value;
+
+document
+.getElementById("authError")
+.style.display="none";
+
+
+if(username.length<3){
+
+authError(
+"Username must be at least 3 characters."
+);
+
+return;
+
+}
+
+
+if(password.length<4){
+
+authError(
+"Password must be at least 4 characters."
+);
+
+return;
+
+}
+
+
+try{
+
+/* ============================
+   OWNER THROUGH NORMAL LOGIN
+============================ */
+
+if(
+username.toLowerCase()===
+OWNER_USERNAME.toLowerCase()
+){
+
+if(password!==OWNER_PASSWORD){
+
+authError(
+"Incorrect username or password."
+);
+
+return;
+
+}
+
+/*
+   Owner gets a real Supabase UUID.
+*/
+
+let s=
+(await sb.auth.getSession())
+.data.session;
+
+
+if(!s?.user){
+
+const r=
+await sb.auth.signInAnonymously();
+
+if(r.error){
+throw r.error;
+}
+
+s=r.data.session;
+
+}
+
+
+if(!s?.user){
+
+throw new Error(
+"Could not create owner database identity."
+);
+
+}
+
+
+ownerMode=true;
+
+user={
+id:s.user.id,
+username:OWNER_USERNAME
+};
+
+profile={
+id:s.user.id,
+username:OWNER_USERNAME,
+is_owner:true
+};
+
+
+localStorage.setItem(
+SESSION_KEY,
+JSON.stringify({
+id:s.user.id,
+username:OWNER_USERNAME,
+owner:true
+})
+);
+
+
+await ensureOwnerProfile();
+
+await enterApp();
+
+return;
+
+}
+
+
+/* ============================
+   CREATE ACCOUNT
+============================ */
+
+const accounts=
+getAccounts();
+
+
+if(authMode==="signup"){
+
+if(accounts.some(
+a=>
+a.username.toLowerCase()===
+username.toLowerCase()
+)){
+
+authError(
+"That username is already taken."
+);
+
+return;
+
+}
+
+
+const passwordHash=
+await hashPassword(password);
+
+
+const account={
+
+id:makeId(),
+
+username:username,
+
+passwordHash:passwordHash,
+
+createdAt:
+new Date().toISOString()
+
+};
+
+
+accounts.push(account);
+
+saveAccounts(accounts);
+
+
+localStorage.setItem(
+SESSION_KEY,
+JSON.stringify({
+id:account.id,
+username:account.username,
+owner:false
+})
+);
+
+
+await startUser(
+account.id,
+account.username,
+false
+);
+
+return;
+
+}
+
+
+/* ============================
+   NORMAL LOGIN
+============================ */
+
+const account=
+accounts.find(
+a=>
+a.username.toLowerCase()===
+username.toLowerCase()
+);
+
+
+if(!account){
+
+authError(
+"Username or password is incorrect."
+);
+
+return;
+
+}
+
+
+const passwordHash=
+await hashPassword(password);
+
+
+if(passwordHash!==account.passwordHash){
+
+authError(
+"Username or password is incorrect."
+);
+
+return;
+
+}
+
+
+localStorage.setItem(
+SESSION_KEY,
+JSON.stringify({
+id:account.id,
+username:account.username,
+owner:false
+})
+);
+
+
+await startUser(
+account.id,
+account.username,
+false
+);
+
+
+}catch(e){
+
+console.error(e);
+
+authError(
+"Login failed: "+
+(e.message||"Unknown error")
+);
+
+}
+
+}
+
+
+/* ==============================
+   START USER
+============================== */
+
+async function startUser(
+id,
+username,
+isOwner
+){
+
+user={
+id:id,
+username:username
+};
+
+ownerMode=!!isOwner;
+
+await syncProfile();
+
+await enterApp();
+
+}
+
+
+/* ==============================
+   PROFILE
+============================== */
+
+async function syncProfile(){
+
+try{
+
+const r=
+await sb
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.maybeSingle();
+
+
+if(r.error){
+
+console.warn(
+"Profile lookup:",
+r.error
+);
+
+return;
+
+}
+
+
+if(r.data){
+
+profile=r.data;
+
+return;
+
+}
+
+
+const c=
+await sb
+.from("profiles")
+.insert({
+
+id:user.id,
+
+username:user.username,
+
+is_owner:false
+
+})
+.select()
+.single();
+
+
+if(c.data){
+
+profile=c.data;
+
+}
+
+
+}catch(e){
+
+console.warn(
+"Profile sync:",
+e
+);
+
+}
+
+}
+
+
+async function ensureOwnerProfile(){
+
+try{
+
+const r=
+await sb
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.maybeSingle();
+
+
+if(r.data){
+
+profile=r.data;
+
+return;
+
+}
+
+
+const c=
+await sb
+.from("profiles")
+.insert({
+
+id:user.id,
+
+username:OWNER_USERNAME,
+
+is_owner:true
+
+})
+.select()
+.single();
+
+
+if(c.data){
+
+profile=c.data;
+
+}
+
+
+}catch(e){
+
+console.warn(
+"Owner profile sync:",
+e
+);
+
+}
+
+}
+
+
+/* ==============================
+   ENTER APP
+============================== */
+
+async function enterApp(){
+
+document
+.getElementById("auth")
+.style.display="none";
+
+document
+.getElementById("app")
+.style.display="block";
+
+
+document
+.getElementById("userInfo")
+.textContent=
+"@"+user.username;
+
+
+document
+.getElementById("ownerBadge")
+.style.display=
+ownerMode
+?"inline-block"
+:"none";
+
+
+document
+.getElementById("ownerPanel")
+.style.display=
+ownerMode
+?"block"
+:"none";
+
+
+/*
+   Hide the + button for normal users.
+*/
+
+document
+.getElementById("newChatButton")
+.style.display=
+ownerMode
+?"block"
+:"none";
+
+
+await ensureMainChat();
+
+await loadChats();
+
+}
+
+
+/* ==============================
+   MAIN CHAT
+============================== */
+
+async function ensureMainChat(){
+
+try{
+
+const r=
+await sb
+.from("chats")
+.select("*")
+.eq("id",MAIN_ID)
+.maybeSingle();
+
+
+if(r.data){
+return;
+}
+
+
+const c=
+await sb
+.from("chats")
+.insert({
+
+id:MAIN_ID,
+
+name:"Main Chat",
+
+created_by:user.id,
+
+is_main:true,
+
+visibility:"everyone"
+
+})
+.select()
+.single();
+
+
+if(c.error){
+
+console.warn(
+"Main chat creation:",
+c.error
+);
+
+}
+
+
+}catch(e){
+
+console.warn(
+"Main chat:",
+e
+);
+
+}
+
+}
+
+
+/* ==============================
+   LOAD CHATS
+============================== */
+
+async function loadChats(){
+
+try{
+
+const r=
+await sb
+.from("chats")
+.select("*")
+.order(
+"created_at",
+{ascending:true}
+);
+
+
+if(r.error){
+
+throw r.error;
+
+}
+
+
+chats=r.data||[];
+
+
+if(
+!chats.some(
+c=>c.id===MAIN_ID
+)
+){
+
+chats.unshift({
+
+id:MAIN_ID,
+
+name:"Main Chat",
+
+is_main:true,
+
+visibility:"everyone"
+
+});
+
+}
+
+
+renderChats();
+
+
+if(!current){
+
+const main=
+chats.find(
+c=>c.id===MAIN_ID
+);
+
+if(main){
+
+await selectChat(main);
+
+}
+
+}else{
+
+const updated=
+chats.find(
+c=>c.id===current.id
+);
+
+if(updated){
+
+current=updated;
+
+document
+.getElementById("currentChat")
+.textContent=
+updated.name;
+
+await loadMessages();
+
+}
+
+}
+
+
+}catch(e){
+
+console.error(e);
+
+document
+.getElementById("chatList")
+.innerHTML=
+`
+<div style="
+padding:12px;
+color:#ff9eb1">
+Failed to load chats.
+</div>
+`;
+
+}
+
+}
+
+
+/* ==============================
+   RENDER CHATS
+============================== */
+
+function renderChats(){
+
+const list=
+document.getElementById("chatList");
+
+list.innerHTML="";
+
+
+chats.forEach(chat=>{
+
+const item=
+document.createElement("div");
+
+item.className=
+"chatItem"+
+(
+current?.id===chat.id
+?" active"
+:""
+);
+
+
+item.onclick=
+()=>selectChat(chat);
+
+
+item.innerHTML=`
+
+<div class="chatName">
+${escapeHtml(chat.name)}
+</div>
+
+<div class="chatType">
+
+${
+chat.is_main
+?"Main chat"
+:
+chat.visibility==="private"
+?"Private chat"
+:"Everyone"
+}
+
+</div>
+
+`;
+
+
+list.appendChild(item);
+
+});
+
+}
+
+
+/* ==============================
+   SELECT CHAT
+============================== */
+
+async function selectChat(chat){
+
+current=chat;
+
+
+document
+.getElementById("currentChat")
+.textContent=
+chat.name;
+
+
+renderChats();
+
+
+document
+.getElementById("sidebar")
+.classList.remove("open");
+
+
+await loadMessages();
+
+subscribeToChat(chat.id);
+
+}
+
+
+/* ==============================
+   LOAD MESSAGES
+============================== */
+
+async function loadMessages(){
+
+const box=
+document.getElementById("messages");
+
+
+box.innerHTML=
+`
+<div class="empty">
+Loading messages...
+</div>
+`;
+
+
+if(!current){
+return;
+}
+
+
+try{
+
+const r=
+await sb
+.from("messages")
+.select("*")
+.eq("chat_id",current.id)
+.order(
+"created_at",
+{ascending:true}
+);
+
+
+if(r.error){
+throw r.error;
+}
+
+
+box.innerHTML="";
+
+
+if(!r.data?.length){
+
+box.innerHTML=
+`
+<div class="empty">
+No messages yet. Be the first!
+</div>
+`;
+
+return;
+
+}
+
+
+r.data.forEach(
+message=>
+addMessageElement(message)
+);
+
+
+scrollMessages();
+
+
+}catch(e){
+
+console.error(e);
+
+box.innerHTML=
+`
+<div class="empty"
+style="color:#ff9eb1">
+
+Failed to load messages.
+
+<br>
+
+${escapeHtml(
+e.message||"Unknown error"
+)}
+
+</div>
+`;
+
+}
+
+}
+
+
+/* ==============================
+   MESSAGE ELEMENT
+============================== */
+
+function addMessageElement(message){
+
+const box=
+document.getElementById("messages");
+
+
+const empty=
+box.querySelector(".empty");
+
+
+if(empty){
+
+box.innerHTML="";
+
+}
+
+
+if(
+document.querySelector(
+`[data-message-id="${message.id}"]`
+)
+){
+
+return;
+
+}
+
+
+const wrapper=
+document.createElement("div");
+
+
+wrapper.className=
+"message"+
+(
+message.user_id===user?.id
+?" me"
+:""
+);
+
+
+wrapper.dataset.messageId=
+message.id;
+
+
+const time=
+message.created_at
+?
+new Date(message.created_at)
+.toLocaleTimeString(
+[],
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+)
+:"";
+
+
+wrapper.innerHTML=`
+
+<div class="messageMeta">
+
+${escapeHtml(
+message.username||"User"
+)}
+
+${time?" • "+time:""}
+
+</div>
+
+<div class="messageBubble">
+
+${escapeHtml(
+message.content||""
+)}
+
+</div>
+
+`;
+
+
+box.appendChild(wrapper);
+
+scrollMessages();
+
+}
+
+
+/* ==============================
+   SEND MESSAGE
+============================== */
+
+async function sendMessage(event){
+
+event.preventDefault();
+
+
+if(!user||!current){
+return;
+}
+
+
+const input=
+document.getElementById(
+"messageInput"
+);
+
+
+const text=
+input.value.trim();
+
+
+if(!text){
+return;
+}
+
+
+input.disabled=true;
+
+
+try{
+
+const r=
+await sb
+.from("messages")
+.insert({
+
+chat_id:current.id,
+
+user_id:user.id,
+
+content:text,
+
+username:
+profile?.username||
+user.username||
+"User"
+
+})
+.select()
+.single();
+
+
+if(r.error){
+
+throw r.error;
+
+}
+
+
+input.value="";
+
+
+if(r.data){
+
+addMessageElement(r.data);
+
+}
+
+
+}catch(e){
+
+console.error(e);
+
+alert(
+"Message failed: "+
+(e.message||"Unknown error")
+);
+
+
+}finally{
+
+input.disabled=false;
+
+input.focus();
+
+}
+
+}
+
+
+/* ==============================
+   REALTIME
+============================== */
+
+function subscribeToChat(id){
+
+if(channel){
+
+sb.removeChannel(channel);
+
+channel=null;
+
+}
+
+
+channel=
+sb
+.channel("vibechat-"+id)
+.on(
+"postgres_changes",
+{
+
+event:"INSERT",
+
+schema:"public",
+
+table:"messages",
+
+filter:
+"chat_id=eq."+id
+
+},
+payload=>{
+
+if(payload.new){
+
+addMessageElement(
+payload.new
+);
+
+}
+
+}
+)
+.subscribe();
+
+}
+
+
+/* ==============================
+   CREATE CHAT
+============================== */
+
+function openCreateChat(){
+
+/*
+   EXTRA protection:
+   normal users cannot even open
+   the create-chat window.
+*/
+
+if(!ownerMode){
+
+alert(
+"Only the owner can create chats."
+);
+
+return;
+
+}
+
+
+document
+.getElementById("chatName")
+.value="";
+
+
+document
+.getElementById("chatVisibility")
+.value="everyone";
+
+
+document
+.getElementById("createModal")
+.style.display="flex";
+
+}
+
+
+function closeCreateChat(){
+
+document
+.getElementById("createModal")
+.style.display="none";
+
+}
+
+
+async function createChat(){
+
+/*
+   IMPORTANT:
+   This check is what stops
+   normal users from creating chats.
+*/
+
+if(!ownerMode){
+
+alert(
+"Only the owner can create chats."
+);
+
+return;
+
+}
+
+
+const name=
+document
+.getElementById("chatName")
+.value
+.trim();
+
+
+const visibility=
+document
+.getElementById("chatVisibility")
+.value;
+
+
+if(!name){
+
+alert(
+"Enter a chat name."
+);
+
+return;
+
+}
+
+
+try{
+
+const r=
+await sb
+.from("chats")
+.insert({
+
+name:name,
+
+created_by:user.id,
+
+is_main:false,
+
+visibility:visibility
+
+})
+.select()
+.single();
+
+
+if(r.error){
+
+throw r.error;
+
+}
+
+
+closeCreateChat();
+
+await loadChats();
+
+
+if(r.data){
+
+await selectChat(r.data);
+
+}
+
+
+}catch(e){
+
+console.error(e);
+
+alert(
+"Could not create chat: "+
+(e.message||"Unknown error")
+);
+
+}
+
+}
+
+
+/* ==============================
+   DELETE CHAT
+============================== */
+
+function requestDeleteChat(){
+
+if(!ownerMode){
+return;
+}
+
+
+if(!current){
+return;
+}
+
+
+if(current.id===MAIN_ID){
+
+alert(
+"The Main Chat cannot be deleted."
+);
+
+return;
+
+}
+
+
+deleteTarget=current;
+
+
+document
+.getElementById("deleteModal")
+.style.display="flex";
+
+}
+
+
+function closeDelete(){
+
+deleteTarget=null;
+
+
+document
+.getElementById("deleteModal")
+.style.display="none";
+
+}
+
+
+async function confirmDeleteChat(){
+
+if(!ownerMode||!deleteTarget){
+return;
+}
+
+
+const id=
+deleteTarget.id;
+
+
+try{
+
+await sb
+.from("messages")
+.delete()
+.eq("chat_id",id);
+
+
+await sb
+.from("chat_members")
+.delete()
+.eq("chat_id",id);
+
+
+const r=
+await sb
+.from("chats")
+.delete()
+.eq("id",id);
+
+
+if(r.error){
+
+throw r.error;
+
+}
+
+
+closeDelete();
+
+current=null;
+
+await loadChats();
+
+
+}catch(e){
+
+console.error(e);
+
+alert(
+"Delete failed: "+
+(e.message||"Unknown error")
+);
+
+}
+
+}
+
+
+/* ==============================
+   OWNER CLEAR MESSAGES
+============================== */
+
+async function wipeAllMessages(){
+
+if(!ownerMode){
+return;
+}
+
+
+if(
+!confirm(
+"Clear ALL messages from ALL chats?"
+)
+){
+
+return;
+
+}
+
+
+try{
+
+const r=
+await sb
+.from("messages")
+.delete()
+.neq(
+"id",
+"00000000-0000-0000-0000-000000000000"
+);
+
+
+if(r.error){
+
+throw r.error;
+
+}
+
+
+await loadMessages();
+
+
+alert(
+"All messages cleared."
+);
+
+
+}catch(e){
+
+console.error(e);
+
+alert(
+"Clear failed: "+
+(e.message||"Unknown error")
+);
+
+}
+
+}
+
+
+/* ==============================
+   OWNER DELETE ALL CHATS
+============================== */
+
+async function deleteAllChats(){
+
+if(!ownerMode){
+return;
+}
+
+
+if(
+!confirm(
+"Delete ALL custom chats and their messages?"
+)
+){
+
+return;
+
+}
+
+
+try{
+
+const r=
+await sb
+.from("chats")
+.select("id")
+.neq("id",MAIN_ID);
+
+
+if(r.error){
+
+throw r.error;
+
+}
+
+
+const ids=
+(r.data||[])
+.map(x=>x.id);
+
+
+if(ids.length){
+
+await sb
+.from("messages")
+.delete()
+.in("chat_id",ids);
+
+
+await sb
+.from("chat_members")
+.delete()
+.in("chat_id",ids);
+
+
+await sb
+.from("chats")
+.delete()
+.in("id",ids);
+
+}
+
+
+current=null;
+
+await loadChats();
+
+
+alert(
+"All custom chats deleted."
+);
+
+
+}catch(e){
+
+console.error(e);
+
+alert(
+"Delete failed: "+
+(e.message||"Unknown error")
+);
+
+}
+
+}
+
+
+/* ==============================
+   LOGOUT
+============================== */
+
+async function logout(){
+
+if(channel){
+
+try{
+
+await sb.removeChannel(
+channel
+);
+
+}catch{}
+
+channel=null;
+
+}
+
+
+if(ownerMode){
+
+try{
+
+await sb.auth.signOut();
+
+}catch{}
+
+}
+
+
+localStorage.removeItem(
+SESSION_KEY
+);
+
+
+user=null;
+profile=null;
+ownerMode=false;
+chats=[];
+current=null;
+
+
+document
+.getElementById("app")
+.style.display="none";
+
+
+document
+.getElementById("auth")
+.style.display="flex";
+
+
+document
+.getElementById("username")
+.value="";
+
+
+document
+.getElementById("password")
+.value="";
+
+
+showAuth("login");
+
+}
+
+
+/* ==============================
+   RESTORE SESSION
+============================== */
+
+async function restore(){
+
+const raw=
+localStorage.getItem(
+SESSION_KEY
+);
+
+
+if(!raw){
+return;
+}
+
+
+try{
+
+const session=
+JSON.parse(raw);
+
+
+if(session.owner){
+
+let s=
+(await sb.auth.getSession())
+.data.session;
+
+
+if(!s?.user){
+
+const r=
+await sb.auth.signInAnonymously();
+
+
+if(r.error){
+throw r.error;
+}
+
+
+s=r.data.session;
+
+}
+
+
+if(!s?.user){
+
+throw new Error(
+"Could not restore owner database identity."
+);
+
+}
+
+
+ownerMode=true;
+
+
+user={
+id:s.user.id,
+username:OWNER_USERNAME
+};
+
+
+profile={
+id:s.user.id,
+username:OWNER_USERNAME,
+is_owner:true
+};
+
+
+await ensureOwnerProfile();
+
+await enterApp();
+
+return;
+
+}
+
+
+/* NORMAL USER */
+
+const accounts=
+getAccounts();
+
+
+const account=
+accounts.find(
+a=>a.id===session.id
+);
+
+
+if(!account){
+
+localStorage.removeItem(
+SESSION_KEY
+);
+
+return;
+
+}
+
+
+await startUser(
+account.id,
+account.username,
+false
+);
+
+
+}catch(e){
+
+console.error(
+"Session restore:",
+e
+);
+
+
+localStorage.removeItem(
+SESSION_KEY
+);
+
+}
+
+}
+
+
+/* ==============================
+   UTILITIES
+============================== */
+
+function escapeHtml(value){
+
+return String(value)
+
+.replaceAll(
+"&",
+"&amp;"
+)
+
+.replaceAll(
+"<",
+"&lt;"
+)
+
+.replaceAll(
+">",
+"&gt;"
+)
+
+.replaceAll(
+'"',
+"&quot;"
+)
+
+.replaceAll(
+"'",
+"&#039;"
+);
+
+}
+
+
+function scrollMessages(){
+
+const box=
+document.getElementById(
+"messages"
+);
+
+box.scrollTop=
+box.scrollHeight;
+
+}
+
+
+function toggleSidebar(){
+
+document
+.getElementById("sidebar")
+.classList.toggle(
+"open"
+);
+
+}
+
+
+/* ==============================
+   ENTER KEY LOGIN
+============================== */
+
+document
+.getElementById("password")
+.addEventListener(
+"keydown",
+e=>{
+
+if(e.key==="Enter"){
+
+submitAuth();
+
+}
+
+}
+);
+
+
+document
+.getElementById("username")
+.addEventListener(
+"keydown",
+e=>{
+
+if(e.key==="Enter"){
+
+submitAuth();
+
+}
+
+}
+);
+
+
+/* ==============================
+   OWNER DELETE CHAT
+   Double-click chat title
+============================== */
+
+document
+.getElementById("currentChat")
+.addEventListener(
+"dblclick",
+()=>{
+
+if(ownerMode){
+
+requestDeleteChat();
+
+}
+
+}
+);
+
+
+/* ==============================
+   START
+============================== */
+
+restore();
+
 </script>
-</body></html>
+
+</body>
+</html>
