@@ -1756,6 +1756,8 @@ e
 
 async function enterApp(){
 
+enableNotifications();
+
 document
 .getElementById("auth")
 .style.display="none";
@@ -2551,6 +2553,47 @@ input.focus();
 
 }
 
+/* =========================================
+   NOTIFICATIONS
+========================================= */
+
+async function enableNotifications(){
+
+if(!("Notification" in window)){
+return;
+}
+
+if(Notification.permission==="default"){
+
+await Notification.requestPermission();
+
+}
+
+}
+
+
+function showNotification(message){
+
+if(
+Notification.permission==="granted" &&
+message.user_id!==user?.id
+){
+
+new Notification(
+"VibeChat 💬",
+{
+body:
+(message.username||"Someone")+
+": "+
+(message.content||"Sent an image"),
+icon:
+"https://cdn-icons-png.flaticon.com/512/134/134914.png"
+}
+);
+
+}
+
+}
 
 /* =========================================
    REALTIME CHAT
@@ -2596,6 +2639,10 @@ return;
 if(payload.new.user_id!==user?.id){
 
 addMessageElement(
+payload.new
+);
+
+showNotification(
 payload.new
 );
 
@@ -3839,9 +3886,35 @@ restore();
 
 </script>
 
-</body>
-</html>
 
+<!-- PROFILE FEATURE -->
+<div id="profileModal" class="modal">
+<div class="modalBox">
+<div class="modalTitle">👤 Profile</div>
+<div id="profileContent"></div>
+<button class="confirm" onclick="closeProfile()">Close</button>
+</div>
+</div>
+
+<script>
+async function openProfile(username){
+ document.getElementById("profileModal").style.display="flex";
+ const box=document.getElementById("profileContent");
+ box.innerHTML="Loading...";
+ let {data}=await sb.from("profiles").select("*").eq("username",username).single();
+ if(!data){
+   box.innerHTML="<p>No profile created yet</p>";
+   return;
+ }
+ box.innerHTML=`
+ ${data.avatar_url?`<img src="${data.avatar_url}" style="width:90px;height:90px;border-radius:50%">`:"👤"}
+ <h3>${escapeHtml(data.username||username)}</h3>
+ <p>${escapeHtml(data.status||"")}</p>
+ <p>${escapeHtml(data.bio||"")}</p>`;
+}
+function closeProfile(){
+ document.getElementById("profileModal").style.display="none";
+}
 </script>
 
 </body>
