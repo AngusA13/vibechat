@@ -890,7 +890,7 @@ onclick="toggleSidebar()">
 
 </div>
 
-<div id="userInfo" class="userInfo"></div>
+<div id="userInfo" class="userInfo" onclick="openProfile(user.username)" style="cursor:pointer"></div>
 
 <div
 id="ownerBadge"
@@ -2341,10 +2341,8 @@ ${
 showName
 ?
 `
-<div class="messageMeta">
-${escapeHtml(
-message.username||"User"
-)}
+<div class="messageMeta" onclick="openProfile('${escapeHtml(message.username||"User")}')" style="cursor:pointer">
+${escapeHtml(message.username||"User")}
 </div>
 `
 :""
